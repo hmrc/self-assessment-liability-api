@@ -2,10 +2,10 @@
   "scopes": [
   ],
   "api": {
-    "name": "Hello World",
-    "description": "A 'hello world' example of an API on the HMRC API Developer Hub.",
-    "context": "discuss-with-the-api-platform-team",
-    "categories": ["OTHER"],
+    "name": "Self Assessment Liability API",
+    "description": "An API to retrieve Self Assessment Liability payment details.",
+    "context": "self-assessment-liability-api",
+    "categories": ["SELF_ASSESSMENT"],
     "versions": [
       {
         "version": "1.0",
