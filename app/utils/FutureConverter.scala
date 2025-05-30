@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import scala.concurrent.Future
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+object FutureConverter {
 
-  val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
+  implicit class FutureOps[A](val a: A) extends AnyVal {
+    def toFuture: Future[A] = Future.successful(a)
+  }
 
 }

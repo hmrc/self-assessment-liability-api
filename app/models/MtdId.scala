@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.json.{Json, Reads}
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+case class MtdId(mtdbsa: String)
 
-  val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
-
+object MtdId {
+  implicit val reads: Reads[MtdId] = Json.reads[MtdId]
 }

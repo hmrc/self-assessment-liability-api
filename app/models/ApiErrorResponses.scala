@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package config
+package models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.json.{Json, OFormat}
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
-
-  val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
-
+case class ApiErrorResponses(status: Int, message: String) extends Throwable
+object ApiErrorResponses {
+  implicit val format: OFormat[ApiErrorResponses] = Json.format[ApiErrorResponses]
 }
