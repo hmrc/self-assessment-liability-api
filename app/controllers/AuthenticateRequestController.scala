@@ -18,7 +18,8 @@ package controllers
 
 import config.AppConfig
 import models.ServiceErrors.{Downstream_Error, Not_Allowed}
-import models.{ApiErrorResponses, RequestData}
+import models.{ApiErrorResponses, RequestData, ServiceErrors}
+import play.api.Logging
 import play.api.mvc.*
 import services.SelfAssessmentService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
@@ -39,111 +40,56 @@ class AuthenticateRequestController(
     override val authConnector: AuthConnector
 )(implicit appConfig: AppConfig, ec: ExecutionContext)
     extends BackendController(cc)
-    with AuthorisedFunctions {
+    with AuthorisedFunctions with Logging{
 
   def authorisedAction(
       utr: String
   )(block: RequestData[AnyContent] => Future[Result]): Action[AnyContent] = {
-    Action.async(cc.parsers.anyContent) { request =>
+    Action.async(cc.parsers.anyContent) { implicit request =>
       implicit val headerCarrier: HeaderCarrier = hc(request)
-
-      authorised(selfAssessmentEnrolments(utr)) {
-        block(RequestData(utr, None, request))
-      }
-        .recoverWith {
-          case _: MissingBearerToken =>
+      authorised(selfAssessmentEnrolments(utr)).retrieve(affinityGroup){
+          case Some(Agent) if appConfig.agentsAllowed  =>  authoriseCaller(true, utr, block)
+          case Some(Agent) if !appConfig.agentsAllowed  =>  Future.successful(Unauthorized(ApiErrorResponses(Not_Allowed.toString, "There were issues with the auth token provided").asJson))
+          case _ => block(RequestData(utr, None, request))
+          }.recoverWith {
+          case _: NoActiveSession =>
             Future.successful(
-              Unauthorized(ApiErrorResponses(Not_Allowed.toString, "missing auth token").asJson)
+              Unauthorized(ApiErrorResponses(Not_Allowed.toString, "There were issues with the auth token provided").asJson)
             )
-          case _: AuthorisationException =>
-            selfAssessmentService
-              .getMtdIdFromUtr(utr)
-              .flatMap { mtdId =>
-                authorised(checkForMtdEnrolment(mtdId))
-                  .retrieve(affinityGroup) {
-                    case Some(Individual) =>
-                      block(RequestData(utr, None, request))
-                    case Some(Organisation) =>
-                      block(RequestData(utr, None, request))
-                    case Some(Agent) =>
-                      if (appConfig.agentsAllowed) {
-
-                        authorised(agentDelegatedEnrolments(utr, mtdId)) {
-                          block(RequestData(utr, None, request))
-                        }.recoverWith { case _: AuthorisationException =>
-                          Future.successful(
-                            InternalServerError(
-                              ApiErrorResponses(
-                                Downstream_Error.toString,
-                                "agent/client handshake was not established"
-                              ).asJson
-                            )
-                          )
-                        }
-                      } else {
-                        Future.successful(
-                          Unauthorized(
-                            ApiErrorResponses(
-                              Not_Allowed.toString,
-                              "Agents are currently not supported by our service"
-                            ).asJson
-                          )
-                        )
-                      }
-
-                    case _ =>
-                      Future.successful(
-                        InternalServerError(
-                          ApiErrorResponses(
-                            Not_Allowed.toString,
-                            "unsupported affinity group"
-                          ).asJson
-                        )
-                      )
-                  }
-                  .recoverWith { case _: AuthorisationException =>
-                    Future.successful(
-                      InternalServerError(
-                        ApiErrorResponses(
-                          Downstream_Error.toString,
-                          "user didnt have any of the self assessment enrolments"
-                        ).asJson
-                      )
-                    )
-                  }
+          case _ : AuthorisationException if affinityGroup != Some(Agent)  => authoriseCaller(false, utr, block)
+          case _ : AuthorisationException => Future.successful(Unauthorized(ApiErrorResponses(Not_Allowed.toString, "you shall not pass").asJson))
               }
-              .recoverWith { case error =>
-                Future.successful(
-                  InternalServerError(
-                    ApiErrorResponses(
-                      Downstream_Error.toString,
-                      "calls to get mtdid failed for some reason"
-                    ).asJson
-                  )
-                )
-              }
-          case error =>
-            Future.successful(
-              InternalServerError(
-                ApiErrorResponses(
-                  Downstream_Error.toString,
-                  "auth returned an error of some kind"
-                ).asJson
-              )
-            )
         }
-    }
   }
+
+  private def authoriseCaller(isAgent: Boolean, utr: String, block: RequestData[AnyContent] => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    selfAssessmentService.getMtdIdFromUtr(utr).flatMap { mtdId =>
+      logger.info(s"mtd id $mtdId fetched")
+      val authorisedFunction: AuthorisedFunction = if (isAgent) {
+        authorised(agentDelegatedEnrolments(utr, mtdId))
+      } else {
+        authorised(checkForMtdEnrolment(mtdId))
+      }
+      authorisedFunction{
+          block(RequestData(utr, Some(mtdId), request))
+        }.recoverWith {
+          case _: AuthorisationException => Future.successful(Unauthorized(ApiErrorResponses(Downstream_Error.toString, "Authorisation failed for the utr provided").asJson))
+        }
+      }
+    }.recoverWith { case _: ServiceErrors => Future.successful(InternalServerError(ApiErrorResponses(Downstream_Error.toString, s"unexpected response when trying to fetch mtdID for utr $utr").asJson))}
+
+
+
 
   private def selfAssessmentEnrolments(utr: String): Predicate = {
     (Individual and Enrolment(IR_SA_Enrolment_Key).withIdentifier(IR_SA_Identifier, utr)) or
-      (Organisation and Enrolment(IR_SA_Enrolment_Key).withIdentifier(IR_SA_Identifier, utr))
+      (Organisation and Enrolment(IR_SA_Enrolment_Key).withIdentifier(IR_SA_Identifier, utr)) or
+      (Agent and Enrolment(ASA_Enrolment_Key))
   }
 
   private def checkForMtdEnrolment(mtdId: String): Predicate = {
     (Individual and Enrolment(Mtd_Enrolment_Key).withIdentifier(Mtd_Identifier, mtdId)) or
-      (Organisation and Enrolment(Mtd_Enrolment_Key).withIdentifier(Mtd_Identifier, mtdId)) or
-      (Agent and Enrolment(ASA_Enrolment_Key))
+      (Organisation and Enrolment(Mtd_Enrolment_Key).withIdentifier(Mtd_Identifier, mtdId))
   }
 
   private def agentDelegatedEnrolments(utr: String, mtdId: String): Predicate = {
