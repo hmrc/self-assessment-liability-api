@@ -37,12 +37,13 @@ class SelfAssessmentHistoryController @Inject() (
 
   def getYourSelfAssessmentData(utr: String): Action[AnyContent] = {
     if (utrInvalid(utr)) {
-      return Action.apply(BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson))
+      return Action.apply(
+        BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
+      )
     }
 
-    authorisedAction(utr) {
-      implicit request =>
-        Future.successful(Ok(Json.obj("message" -> "Success!")))
+    authorisedAction(utr) { implicit request =>
+      Future.successful(Ok(Json.obj("message" -> "Success!")))
     }
   }
 
@@ -51,7 +52,7 @@ class SelfAssessmentHistoryController @Inject() (
 
     utrPattern.findFirstMatchIn(utr) match {
       case Some(_) => false
-      case None => true
+      case None    => true
     }
   }
 }
