@@ -27,4 +27,5 @@ object ServiceErrors {
   case object More_Than_One_NINO_Found_For_SAUTR extends ServiceErrors
   case object No_NINO_Found_For_SAUTR extends ServiceErrors
   case object Not_Allowed extends ServiceErrors
+  case object Low_Confidence extends ServiceErrors
 }
