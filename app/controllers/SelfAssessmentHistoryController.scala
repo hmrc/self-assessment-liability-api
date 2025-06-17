@@ -36,23 +36,17 @@ class SelfAssessmentHistoryController @Inject() (
     extends AuthenticateRequestController(cc, service, authConnector) {
 
   def getYourSelfAssessmentData(utr: String): Action[AnyContent] = {
-    if (utrInvalid(utr)) {
-      return Action.apply(
-        BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
-      )
-    }
-
-    authorisedAction(utr) { implicit request =>
-      Future.successful(Ok(Json.obj("message" -> "Success!")))
-    }
-  }
-
-  private def utrInvalid(utr: String): Boolean = {
     val utrPattern: Regex = "^[0-9]{10}$".r
 
     utrPattern.findFirstMatchIn(utr) match {
-      case Some(_) => false
-      case None    => true
+      case Some(_) =>
+        authorisedAction(utr) { implicit request =>
+          Future.successful(Ok(Json.obj("message" -> "Success!")))
+        }
+      case None =>
+        Action.apply(
+          BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
+        )
     }
   }
 }
