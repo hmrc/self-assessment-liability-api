@@ -50,6 +50,14 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
     "12345678901234567890"
   )
 
+  private val validUtrTable = Table(
+    "Valid UTR",
+    "1234567890",
+    "0123456789",
+    "0000000000",
+    "9999999999"
+  )
+
   private def controllerMethod(
       utr: String,
       controller: SelfAssessmentHistoryController
@@ -79,17 +87,19 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
         }
       }
 
-      "return Ok for a valid UTR" in {
-        running(app) {
-          val controller =
-            new SelfAssessmentHistoryController(authConnector, selfAssessmentService, cc)(
-              appConfig,
-              ExecutionContext.global
-            )
-          val result = controllerMethod("1234567890", controller)(FakeRequest())
+      "return Ok for valid UTRs" in {
+        forEvery(validUtrTable) { utr =>
+          running(app) {
+            val controller =
+              new SelfAssessmentHistoryController(authConnector, selfAssessmentService, cc)(
+                appConfig,
+                ExecutionContext.global
+              )
+            val result = controllerMethod(utr, controller)(FakeRequest())
 
-          status(result) mustBe OK
-          contentAsJson(result) mustBe Json.obj("message" -> "Success!")
+            status(result) mustBe OK
+            contentAsJson(result) mustBe Json.obj("message" -> "Success!")
+          }
         }
       }
     }
