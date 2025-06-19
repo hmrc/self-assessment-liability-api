@@ -44,7 +44,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
     "Invalid UTR",
     "",
     "          ",
-    "?!#*",
+    "?!#*567890",
     "123456",
     "abc4567890",
     "12345678901234567890"
