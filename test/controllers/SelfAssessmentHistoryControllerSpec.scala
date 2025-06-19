@@ -45,14 +45,14 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
     "",
     "          ",
     "?!#*567890",
-    "1",
-    "123456",
-    "aBc4567890",
     "12345678901234567890"
   )
 
   private val validUtrTable = Table(
     "Valid UTR",
+    "1",
+    "123456",
+    "aBc4567890",
     "1234567890",
     "0123456789",
     "0000000000",

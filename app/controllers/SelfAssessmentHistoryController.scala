@@ -36,7 +36,7 @@ class SelfAssessmentHistoryController @Inject() (
     extends AuthenticateRequestController(cc, service, authConnector) {
 
   def getYourSelfAssessmentData(utr: String): Action[AnyContent] = {
-    val utrPattern: Regex = "^[0-9]{10}$".r
+    val utrPattern: Regex = "^[A-Za-z0-9]{1,10}$".r
 
     utrPattern.findFirstMatchIn(utr) match {
       case Some(_) =>
