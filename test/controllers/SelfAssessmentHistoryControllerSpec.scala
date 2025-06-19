@@ -45,8 +45,9 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
     "",
     "          ",
     "?!#*567890",
+    "1",
     "123456",
-    "abc4567890",
+    "aBc4567890",
     "12345678901234567890"
   )
 
