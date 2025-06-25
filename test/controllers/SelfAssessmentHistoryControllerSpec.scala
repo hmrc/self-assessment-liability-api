@@ -22,42 +22,32 @@ import models.ServiceErrors.Invalid_SAUTR
 import shared.{HttpWireMock, SpecBase}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.prop.TableDrivenPropertyChecks.forEvery
-import org.scalatest.prop.Tables.Table
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, running, status}
-import services.SelfAssessmentService
+import services.{SelfAssessmentService, UtrValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
   private val authConnector: AuthConnector = mock[AuthConnector]
   private val selfAssessmentService: SelfAssessmentService = mock[SelfAssessmentService]
+  private val utrValidationService: UtrValidationService = mock[UtrValidationService]
   private val appConfig: AppConfig = mock[AppConfig]
   private val cc = app.injector.instanceOf[ControllerComponents]
-
-  private val invalidUtrTable = Table(
-    "Invalid UTR",
-    "",
-    "          ",
-    "?!#*567890",
-    "12345678901234567890"
-  )
-
-  private val validUtrTable = Table(
-    "Valid UTR",
-    "1",
-    "123456",
-    "aBc4567890",
-    "1234567890",
-    "0123456789",
-    "0000000000",
-    "9999999999"
-  )
+  private val controller =
+    new SelfAssessmentHistoryController(
+      authConnector,
+      selfAssessmentService,
+      utrValidationService,
+      cc
+    )(
+      appConfig,
+      ec
+    )
 
   private def controllerMethod(
       utr: String,
@@ -69,38 +59,28 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
       .thenReturn(Future.successful(()))
 
     "getting self assessment data" should {
-      "return BadRequest for invalid UTRs" in {
-        forEvery(invalidUtrTable) { utr =>
-          running(app) {
-            val controller =
-              new SelfAssessmentHistoryController(authConnector, selfAssessmentService, cc)(
-                appConfig,
-                ExecutionContext.global
-              )
-            val result = controllerMethod(utr, controller)(FakeRequest())
+      "return BadRequest for an invalid UTR" in {
+        when(utrValidationService.isValidUtr(any())).thenReturn(false)
 
-            status(result) mustBe BAD_REQUEST
-            contentAsJson(result) mustBe ApiErrorResponses(
-              Invalid_SAUTR.toString,
-              "invalid UTR format"
-            ).asJson
-          }
+        running(app) {
+          val result = controllerMethod("!£$%", controller)(FakeRequest())
+
+          status(result) mustBe BAD_REQUEST
+          contentAsJson(result) mustBe ApiErrorResponses(
+            Invalid_SAUTR.toString,
+            "invalid UTR format"
+          ).asJson
         }
       }
 
-      "return Ok for valid UTRs" in {
-        forEvery(validUtrTable) { utr =>
-          running(app) {
-            val controller =
-              new SelfAssessmentHistoryController(authConnector, selfAssessmentService, cc)(
-                appConfig,
-                ExecutionContext.global
-              )
-            val result = controllerMethod(utr, controller)(FakeRequest())
+      "return Ok for a valid UTR" in {
+        when(utrValidationService.isValidUtr(any())).thenReturn(true)
 
-            status(result) mustBe OK
-            contentAsJson(result) mustBe Json.obj("message" -> "Success!")
-          }
+        running(app) {
+          val result = controllerMethod("1234567890", controller)(FakeRequest())
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.obj("message" -> "Success!")
         }
       }
     }

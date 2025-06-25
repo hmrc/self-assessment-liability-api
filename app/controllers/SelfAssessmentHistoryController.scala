@@ -21,32 +21,29 @@ import models.ApiErrorResponses
 import models.ServiceErrors.Invalid_SAUTR
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import services.SelfAssessmentService
+import services.{SelfAssessmentService, UtrValidationService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.matching.Regex
 
 class SelfAssessmentHistoryController @Inject() (
     override val authConnector: AuthConnector,
-    val service: SelfAssessmentService,
+    val selfAssessmentService: SelfAssessmentService,
+    val utrValidationService: UtrValidationService,
     cc: ControllerComponents
 )(implicit appConfig: AppConfig, ec: ExecutionContext)
-    extends AuthenticateRequestController(cc, service, authConnector) {
+    extends AuthenticateRequestController(cc, selfAssessmentService, authConnector) {
 
   def getYourSelfAssessmentData(utr: String): Action[AnyContent] = {
-    val utrPattern: Regex = "^[A-Za-z0-9]{1,10}$".r
-
-    utrPattern.findFirstMatchIn(utr) match {
-      case Some(_) =>
-        authorisedAction(utr) { implicit request =>
-          Future.successful(Ok(Json.obj("message" -> "Success!")))
-        }
-      case None =>
-        Action.apply(
-          BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
-        )
+    if (utrValidationService.isValidUtr(utr)) {
+      authorisedAction(utr) { implicit request =>
+        Future.successful(Ok(Json.obj("message" -> "Success!")))
+      }
+    } else {
+      Action.apply(cc.parsers.anyContent)(
+        BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
+      )
     }
   }
 }

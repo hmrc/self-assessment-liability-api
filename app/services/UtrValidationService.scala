@@ -16,20 +16,14 @@
 
 package services
 
-import connectors.{CitizenDetailsConnector, MtdIdentifierLookupConnector}
-import uk.gov.hmrc.http.HeaderCarrier
+import scala.util.matching.Regex
 
-import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
-
-class SelfAssessmentService @Inject() (
-    val cidConnector: CitizenDetailsConnector,
-    mtdConnector: MtdIdentifierLookupConnector
-)(implicit ec: ExecutionContext) {
-  def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
-    for {
-      nino <- cidConnector.getNino(utr)
-      mtdId <- mtdConnector.getMtdId(nino)
-    } yield mtdId.mtdbsa
+class UtrValidationService {
+  def isValidUtr(utr: String): Boolean = {
+    val utrPattern: Regex = "^[A-Za-z0-9]{1,10}$".r
+    utrPattern.findFirstMatchIn(utr) match {
+      case Some(_) => true
+      case None    => false
+    }
   }
 }
