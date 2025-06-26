@@ -16,17 +16,17 @@
 
 package controllers
 
-import config.AppConfig
-import models.ServiceErrors.{Downstream_Error, Not_Allowed}
+import models.ServiceErrors.{Downstream_Error, Invalid_SAUTR, Not_Allowed}
 import models.{ApiErrorResponses, RequestData}
 import play.api.mvc.*
 import services.SelfAssessmentService
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.affinityGroup
-import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.UtrValidator
 import utils.constants.EnrolmentConstants.*
 
 import javax.inject.Singleton
@@ -37,7 +37,7 @@ class AuthenticateRequestController(
     cc: ControllerComponents,
     selfAssessmentService: SelfAssessmentService,
     override val authConnector: AuthConnector
-)(implicit appConfig: AppConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with AuthorisedFunctions {
 
@@ -46,28 +46,26 @@ class AuthenticateRequestController(
   )(block: RequestData[AnyContent] => Future[Result]): Action[AnyContent] = {
     Action.async(cc.parsers.anyContent) { request =>
       implicit val headerCarrier: HeaderCarrier = hc(request)
-
-      authorised(selfAssessmentEnrolments(utr)) {
-        block(RequestData(utr, None, request))
-      }
-        .recoverWith {
-          case _: MissingBearerToken =>
-            Future.successful(
-              Unauthorized(ApiErrorResponses(Not_Allowed.toString, "missing auth token").asJson)
-            )
-          case _: AuthorisationException =>
-            selfAssessmentService
-              .getMtdIdFromUtr(utr)
-              .flatMap { mtdId =>
-                authorised(checkForMtdEnrolment(mtdId))
-                  .retrieve(affinityGroup) {
-                    case Some(Individual) =>
-                      block(RequestData(utr, None, request))
-                    case Some(Organisation) =>
-                      block(RequestData(utr, None, request))
-                    case Some(Agent) =>
-                      if (appConfig.agentsAllowed) {
-
+      if (UtrValidator.isValidUtr(utr)) {
+        authorised(selfAssessmentEnrolments(utr)) {
+          block(RequestData(utr, None, request))
+        }
+          .recoverWith {
+            case _: MissingBearerToken =>
+              Future.successful(
+                Unauthorized(ApiErrorResponses(Not_Allowed.toString, "missing auth token").asJson)
+              )
+            case _: AuthorisationException =>
+              selfAssessmentService
+                .getMtdIdFromUtr(utr)
+                .flatMap { mtdId =>
+                  authorised(checkForMtdEnrolment(mtdId))
+                    .retrieve(affinityGroup) {
+                      case Some(Individual) =>
+                        block(RequestData(utr, None, request))
+                      case Some(Organisation) =>
+                        block(RequestData(utr, None, request))
+                      case Some(Agent) =>
                         authorised(agentDelegatedEnrolments(utr, mtdId)) {
                           block(RequestData(utr, None, request))
                         }.recoverWith { case _: AuthorisationException =>
@@ -80,58 +78,53 @@ class AuthenticateRequestController(
                             )
                           )
                         }
-                      } else {
+                      case _ =>
                         Future.successful(
-                          Unauthorized(
+                          InternalServerError(
                             ApiErrorResponses(
                               Not_Allowed.toString,
-                              "Agents are currently not supported by our service"
+                              "unsupported affinity group"
                             ).asJson
                           )
                         )
-                      }
-
-                    case _ =>
+                    }
+                    .recoverWith { case _: AuthorisationException =>
                       Future.successful(
                         InternalServerError(
                           ApiErrorResponses(
-                            Not_Allowed.toString,
-                            "unsupported affinity group"
+                            Downstream_Error.toString,
+                            "user didnt have any of the self assessment enrolments"
                           ).asJson
                         )
                       )
-                  }
-                  .recoverWith { case _: AuthorisationException =>
-                    Future.successful(
-                      InternalServerError(
-                        ApiErrorResponses(
-                          Downstream_Error.toString,
-                          "user didnt have any of the self assessment enrolments"
-                        ).asJson
-                      )
+                    }
+                }
+                .recoverWith { case error =>
+                  Future.successful(
+                    InternalServerError(
+                      ApiErrorResponses(
+                        Downstream_Error.toString,
+                        "calls to get mtdid failed for some reason"
+                      ).asJson
                     )
-                  }
-              }
-              .recoverWith { case error =>
-                Future.successful(
-                  InternalServerError(
-                    ApiErrorResponses(
-                      Downstream_Error.toString,
-                      "calls to get mtdid failed for some reason"
-                    ).asJson
                   )
+                }
+            case error =>
+              Future.successful(
+                InternalServerError(
+                  ApiErrorResponses(
+                    Downstream_Error.toString,
+                    "auth returned an error of some kind"
+                  ).asJson
                 )
-              }
-          case error =>
-            Future.successful(
-              InternalServerError(
-                ApiErrorResponses(
-                  Downstream_Error.toString,
-                  "auth returned an error of some kind"
-                ).asJson
               )
-            )
-        }
+          }
+      } else {
+        Future.successful(
+          BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
+        )
+      }
+
     }
   }
 

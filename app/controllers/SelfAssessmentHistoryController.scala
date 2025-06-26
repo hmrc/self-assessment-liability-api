@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.SelfAssessmentService
@@ -27,14 +26,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SelfAssessmentHistoryController @Inject() (
     override val authConnector: AuthConnector,
-    val service: SelfAssessmentService,
+    val selfAssessmentService: SelfAssessmentService,
     cc: ControllerComponents
-)(implicit appConfig: AppConfig, ec: ExecutionContext)
-    extends AuthenticateRequestController(cc, service, authConnector) {
+)(implicit ec: ExecutionContext)
+    extends AuthenticateRequestController(cc, selfAssessmentService, authConnector) {
 
   def getYourSelfAssessmentData(utr: String): Action[AnyContent] = authorisedAction(utr) {
     implicit request =>
       Future.successful(Ok(Json.obj("message" -> "Success!")))
   }
-
 }
