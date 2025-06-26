@@ -17,7 +17,12 @@
 package controllers
 import config.AppConfig
 import models.ApiErrorResponses
-import models.ServiceErrors.{Downstream_Error, More_Than_One_NINO_Found_For_SAUTR, Not_Allowed}
+import models.ServiceErrors.{
+  Downstream_Error,
+  Low_Confidence,
+  More_Than_One_NINO_Found_For_SAUTR,
+  Not_Allowed
+}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -30,6 +35,7 @@ import services.SelfAssessmentService
 import shared.{HttpWireMock, SpecBase}
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,6 +49,8 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
   private val cc = app.injector.instanceOf[ControllerComponents]
   private val utr = "1234567890"
   private val mtdId = "MTDITID123456"
+  private val minimumConfidence = ConfidenceLevel.L250
+  private val lowConfidence = ConfidenceLevel.L50
 
   private def methodNeedingAuthentication(
       utr: String,
@@ -51,24 +59,8 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
     .authorisedAction(utr)(_ => Future.successful(Results.Ok))
 
   "AuthenticateRequestController" when {
-    "user is an individual" should {
-      "authenticate the provided utr against their auth data if they have the legacy enrolment" in {
-        when(authConnector.authorise(any(), any())(any(), any()))
-          .thenReturn(Future.successful(()))
-
-        running(app) {
-          val controller =
-            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
-              appConfig,
-              ExecutionContext.global
-            )
-          val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
-
-          status(result) mustBe OK
-        }
-      }
-
-      "return Unauthorized when bearer token is missing" in {
+    "bearer token is missing" should {
+      "return Unauthorized" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new MissingBearerToken))
 
@@ -89,11 +81,68 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
       }
     }
 
+    "user has legacy enrolment" should {
+      "authenticate the provided utr for Individual affinity group" in {
+        when(authConnector.authorise(any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some(Individual) and minimumConfidence))
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ExecutionContext.global
+            )
+          val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
+
+          status(result) mustBe OK
+        }
+      }
+
+      "authenticate the provided utr for Organisation affinity group" in {
+        when(authConnector.authorise(any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some(Organisation) and lowConfidence))
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ExecutionContext.global
+            )
+          val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
+
+          status(result) mustBe OK
+        }
+      }
+
+      "return Unauthorized for Individual with low user confidence level" in {
+        when(authConnector.authorise(any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some(Individual) and lowConfidence))
+
+        when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(mtdId))
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ExecutionContext.global
+            )
+          val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
+
+          status(result) mustBe UNAUTHORIZED
+          contentAsJson(result) mustBe ApiErrorResponses(
+            Low_Confidence.toString,
+            "user confidence level is too low"
+          ).asJson
+        }
+      }
+    }
+
     "user has MTD enrolment but not legacy enrolment" should {
       "authenticate successfully for Individual affinity group" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(Some(Individual)))
+          .thenReturn(Future.successful(Some(Individual) and minimumConfidence))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
           .thenReturn(Future.successful(mtdId))
@@ -113,7 +162,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
       "authenticate successfully for Organisation affinity group" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(Some(Organisation)))
+          .thenReturn(Future.successful(Some(Organisation) and lowConfidence))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
           .thenReturn(Future.successful(mtdId))
@@ -129,13 +178,37 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           status(result) mustBe OK
         }
       }
+
+      "return Unauthorized for Individual with low user confidence level" in {
+        when(authConnector.authorise(any(), any())(any(), any()))
+          .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
+          .thenReturn(Future.successful(Some(Individual) and lowConfidence))
+
+        when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(mtdId))
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ExecutionContext.global
+            )
+          val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
+
+          status(result) mustBe UNAUTHORIZED
+          contentAsJson(result) mustBe ApiErrorResponses(
+            Low_Confidence.toString,
+            "user confidence level is too low"
+          ).asJson
+        }
+      }
     }
 
     "user is an agent" should {
       "authenticate successfully when agents are allowed and delegation is established" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(Some(Agent)))
+          .thenReturn(Future.successful(Some(Agent) and lowConfidence))
           .thenReturn(Future.successful(()))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
@@ -158,7 +231,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
       "return Unauthorized when agents are not allowed" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(Some(Agent)))
+          .thenReturn(Future.successful(Some(Agent) and lowConfidence))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
           .thenReturn(Future.successful(mtdId))
@@ -184,7 +257,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
       "return InternalServerError when agent/client handshake is not established" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(Some(Agent)))
+          .thenReturn(Future.successful(Some(Agent) and lowConfidence))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
@@ -260,7 +333,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
       "return InternalServerError for unsupported affinity group" in {
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(new AuthorisationException("not authorised") {}))
-          .thenReturn(Future.successful(None))
+          .thenReturn(Future.successful(None and lowConfidence))
 
         when(selfAssessmentService.getMtdIdFromUtr(eqTo(utr))(any[HeaderCarrier]))
           .thenReturn(Future.successful(mtdId))
