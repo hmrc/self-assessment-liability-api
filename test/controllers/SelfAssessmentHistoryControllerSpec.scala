@@ -27,22 +27,21 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, running, status}
-import services.{SelfAssessmentService, UtrValidationService}
+import services.SelfAssessmentService
 import uk.gov.hmrc.auth.core.AuthConnector
+import utils.UtrValidator
 
 import scala.concurrent.Future
 
 class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
   private val authConnector: AuthConnector = mock[AuthConnector]
   private val selfAssessmentService: SelfAssessmentService = mock[SelfAssessmentService]
-  private val utrValidationService: UtrValidationService = mock[UtrValidationService]
   private val appConfig: AppConfig = mock[AppConfig]
   private val cc = app.injector.instanceOf[ControllerComponents]
   private val controller =
     new SelfAssessmentHistoryController(
       authConnector,
       selfAssessmentService,
-      utrValidationService,
       cc
     )(
       appConfig,
@@ -60,7 +59,6 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
 
     "getting self assessment data" should {
       "return BadRequest for an invalid UTR" in {
-        when(utrValidationService.isValidUtr(any())).thenReturn(false)
 
         running(app) {
           val result = controllerMethod("!£$%", controller)(FakeRequest())
@@ -74,8 +72,6 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
       }
 
       "return Ok for a valid UTR" in {
-        when(utrValidationService.isValidUtr(any())).thenReturn(true)
-
         running(app) {
           val result = controllerMethod("1234567890", controller)(FakeRequest())
 

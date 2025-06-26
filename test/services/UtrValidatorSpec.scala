@@ -19,9 +19,10 @@ package services
 import shared.SpecBase
 import org.scalatest.prop.TableDrivenPropertyChecks.forEvery
 import org.scalatest.prop.Tables.Table
+import utils.UtrValidator
 
-class UtrValidationServiceSpec extends SpecBase {
-  private val utrValidationService: UtrValidationService = new UtrValidationService
+class UtrValidatorSpec extends SpecBase {
+    
 
   private val invalidUtrTable = Table(
     "Invalid UTR",
@@ -46,13 +47,13 @@ class UtrValidationServiceSpec extends SpecBase {
     "validating a UTR" should {
       "return false for invalid UTRs" in {
         forEvery(invalidUtrTable) { utr =>
-          utrValidationService.isValidUtr(utr) mustBe false
+          UtrValidator.isValidUtr(utr) mustBe false
         }
       }
 
       "return true for valid UTRs" in {
         forEvery(validUtrTable) { utr =>
-          utrValidationService.isValidUtr(utr) mustBe true
+          UtrValidator.isValidUtr(utr) mustBe true
         }
       }
     }

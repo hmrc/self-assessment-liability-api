@@ -41,6 +41,7 @@ trait SpecBase
     with Writeables
     with GuiceOneAppPerSuite {
 
+
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 

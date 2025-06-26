@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package services
+package utils
 
 import scala.util.matching.Regex
 
-class UtrValidationService {
+object UtrValidator {
   def isValidUtr(utr: String): Boolean = {
     val utrPattern: Regex = "^[A-Za-z0-9]{1,10}$".r
     utrPattern.findFirstMatchIn(utr) match {

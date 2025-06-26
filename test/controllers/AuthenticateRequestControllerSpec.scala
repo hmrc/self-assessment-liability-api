@@ -17,7 +17,12 @@
 package controllers
 import config.AppConfig
 import models.ApiErrorResponses
-import models.ServiceErrors.{Downstream_Error, More_Than_One_NINO_Found_For_SAUTR, Not_Allowed}
+import models.ServiceErrors.{
+  Downstream_Error,
+  Invalid_SAUTR,
+  More_Than_One_NINO_Found_For_SAUTR,
+  Not_Allowed
+}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -32,7 +37,7 @@ import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
   override lazy val app: Application = new GuiceApplicationBuilder().build()
@@ -40,9 +45,9 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
   private val authConnector: AuthConnector = mock[AuthConnector]
   private val selfAssessmentService: SelfAssessmentService = mock[SelfAssessmentService]
   private val appConfig: AppConfig = mock[AppConfig]
-  private val cc = app.injector.instanceOf[ControllerComponents]
   private val utr = "1234567890"
   private val mtdId = "MTDITID123456"
+  private val cc: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
   private def methodNeedingAuthentication(
       utr: String,
@@ -60,7 +65,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -76,7 +81,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -102,7 +107,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -122,7 +127,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -147,7 +152,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -169,7 +174,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -196,7 +201,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -221,7 +226,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -229,6 +234,42 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           contentAsJson(result) mustBe ApiErrorResponses(
             Downstream_Error.toString,
             "calls to get mtdid failed for some reason"
+          ).asJson
+        }
+      }
+
+      "return BadRequest if utr is invalid" in {
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ec
+            )
+          val result = methodNeedingAuthentication("1231254243213213", controller)(FakeRequest())
+
+          status(result) mustBe BAD_REQUEST
+          contentAsJson(result) mustBe ApiErrorResponses(
+            Invalid_SAUTR.toString,
+            "invalid UTR format"
+          ).asJson
+        }
+      }
+
+      "return BadRequest if utr is missing" in {
+
+        running(app) {
+          val controller =
+            new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
+              appConfig,
+              ec
+            )
+          val result = methodNeedingAuthentication("", controller)(FakeRequest())
+
+          status(result) mustBe BAD_REQUEST
+          contentAsJson(result) mustBe ApiErrorResponses(
+            Invalid_SAUTR.toString,
+            "invalid UTR format"
           ).asJson
         }
       }
@@ -245,7 +286,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -269,7 +310,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
@@ -289,7 +330,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val controller =
             new AuthenticateRequestController(cc, selfAssessmentService, authConnector)(
               appConfig,
-              ExecutionContext.global
+              ec
             )
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
