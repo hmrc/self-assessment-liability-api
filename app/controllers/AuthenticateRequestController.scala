@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import models.ServiceErrors.{Downstream_Error, Invalid_SAUTR, Not_Allowed}
 import models.{ApiErrorResponses, RequestData}
 import play.api.mvc.*
@@ -38,7 +37,7 @@ class AuthenticateRequestController(
     cc: ControllerComponents,
     selfAssessmentService: SelfAssessmentService,
     override val authConnector: AuthConnector
-)(implicit appConfig: AppConfig, ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with AuthorisedFunctions {
 
@@ -47,7 +46,7 @@ class AuthenticateRequestController(
   )(block: RequestData[AnyContent] => Future[Result]): Action[AnyContent] = {
     Action.async(cc.parsers.anyContent) { request =>
       implicit val headerCarrier: HeaderCarrier = hc(request)
-      if (UtrValidator.isValidUtr(utr)){
+      if (UtrValidator.isValidUtr(utr)) {
         authorised(selfAssessmentEnrolments(utr)) {
           block(RequestData(utr, None, request))
         }
@@ -67,31 +66,18 @@ class AuthenticateRequestController(
                       case Some(Organisation) =>
                         block(RequestData(utr, None, request))
                       case Some(Agent) =>
-                        if (appConfig.agentsAllowed) {
-
-                          authorised(agentDelegatedEnrolments(utr, mtdId)) {
-                            block(RequestData(utr, None, request))
-                          }.recoverWith { case _: AuthorisationException =>
-                            Future.successful(
-                              InternalServerError(
-                                ApiErrorResponses(
-                                  Downstream_Error.toString,
-                                  "agent/client handshake was not established"
-                                ).asJson
-                              )
-                            )
-                          }
-                        } else {
+                        authorised(agentDelegatedEnrolments(utr, mtdId)) {
+                          block(RequestData(utr, None, request))
+                        }.recoverWith { case _: AuthorisationException =>
                           Future.successful(
-                            Unauthorized(
+                            InternalServerError(
                               ApiErrorResponses(
-                                Not_Allowed.toString,
-                                "Agents are currently not supported by our service"
+                                Downstream_Error.toString,
+                                "agent/client handshake was not established"
                               ).asJson
                             )
                           )
                         }
-
                       case _ =>
                         Future.successful(
                           InternalServerError(
@@ -133,8 +119,10 @@ class AuthenticateRequestController(
                 )
               )
           }
-      } else{
-        Future.successful(BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson))
+      } else {
+        Future.successful(
+          BadRequest(ApiErrorResponses(Invalid_SAUTR.toString, "invalid UTR format").asJson)
+        )
       }
 
     }

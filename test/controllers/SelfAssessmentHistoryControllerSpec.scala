@@ -16,10 +16,8 @@
 
 package controllers
 
-import config.AppConfig
 import models.ApiErrorResponses
 import models.ServiceErrors.Invalid_SAUTR
-import shared.{HttpWireMock, SpecBase}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -28,15 +26,14 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, running, status}
 import services.SelfAssessmentService
+import shared.{HttpWireMock, SpecBase}
 import uk.gov.hmrc.auth.core.AuthConnector
-import utils.UtrValidator
 
 import scala.concurrent.Future
 
 class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
   private val authConnector: AuthConnector = mock[AuthConnector]
   private val selfAssessmentService: SelfAssessmentService = mock[SelfAssessmentService]
-  private val appConfig: AppConfig = mock[AppConfig]
   private val cc = app.injector.instanceOf[ControllerComponents]
   private val controller =
     new SelfAssessmentHistoryController(
@@ -44,7 +41,6 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase with HttpWireMock {
       selfAssessmentService,
       cc
     )(
-      appConfig,
       ec
     )
 

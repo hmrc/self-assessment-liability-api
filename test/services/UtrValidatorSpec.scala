@@ -22,7 +22,6 @@ import org.scalatest.prop.Tables.Table
 import utils.UtrValidator
 
 class UtrValidatorSpec extends SpecBase {
-    
 
   private val invalidUtrTable = Table(
     "Invalid UTR",
