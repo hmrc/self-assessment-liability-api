@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package utils
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import scala.util.matching.Regex
 
-case class ApiErrorResponses(message: String) extends Throwable {
-  val asJson: JsValue = Json.toJson(this)
-}
-object ApiErrorResponses {
-  implicit val format: OFormat[ApiErrorResponses] = Json.format[ApiErrorResponses]
+object UtrValidator {
+  def isValidUtr(utr: String): Boolean = {
+    val utrPattern: Regex = "^[A-Za-z0-9]{1,10}$".r
+    utrPattern.findFirstMatchIn(utr) match {
+      case Some(_) => true
+      case None    => false
+    }
+  }
 }

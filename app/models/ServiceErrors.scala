@@ -22,6 +22,7 @@ sealed abstract class ServiceErrors extends Throwable {
 
 object ServiceErrors {
   case object Downstream_Error extends ServiceErrors
+  case object Service_Currently_Unavailable extends ServiceErrors
   case object Invalid_SAUTR extends ServiceErrors
   case object Invalid_NINO extends ServiceErrors
   case object More_Than_One_NINO_Found_For_SAUTR extends ServiceErrors
