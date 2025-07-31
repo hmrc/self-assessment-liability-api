@@ -16,11 +16,17 @@
 
 package models
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 
-case class ApiErrorResponses(message: String) extends Throwable {
-  val asJson: JsValue = Json.toJson(this)
-}
-object ApiErrorResponses {
-  implicit val format: OFormat[ApiErrorResponses] = Json.format[ApiErrorResponses]
+case class PaymentHistoryDetails(
+    paymentAmount: Double,
+    paymentId: String,
+    paymentMethod: String,
+    paymentDate: String,
+    dateProcessed: String,
+    allocationReference: Option[String]
+)
+
+object PaymentHistoryDetails {
+  implicit val format: OFormat[PaymentHistoryDetails] = Json.format[PaymentHistoryDetails]
 }

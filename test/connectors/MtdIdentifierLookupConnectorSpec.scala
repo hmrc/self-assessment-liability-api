@@ -38,20 +38,20 @@ class MtdIdentifierLookupConnectorSpec extends SpecBase with HttpWireMock {
 
   "getMtdId" should {
     "return mtd ID associated with the nino if 200 response is received" in {
-      simmulateGet(serviceUrl("nino"), OK, successResponse)
+      simulateGet(serviceUrl("nino"), OK, successResponse)
       val result = connector.getMtdId("nino")
       result.futureValue mustBe mtdId
     }
 
     "return Invalid_NINO error in case of a 400 response" in {
-      simmulateGet(serviceUrl("invalidNino"), BAD_REQUEST, "")
+      simulateGet(serviceUrl("invalidNino"), BAD_REQUEST, "")
       val result = connector.getMtdId("invalidNino")
       result.failed.futureValue mustBe Invalid_NINO
 
     }
 
     "return Downstream_Error in case of a any other response" in {
-      simmulateGet(serviceUrl("ninoCausingInternalError"), INTERNAL_SERVER_ERROR, "")
+      simulateGet(serviceUrl("ninoCausingInternalError"), INTERNAL_SERVER_ERROR, "")
       val result = connector.getMtdId("ninoCausinginternalError")
       result.failed.futureValue mustBe Downstream_Error
 

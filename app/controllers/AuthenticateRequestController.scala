@@ -17,7 +17,6 @@
 package controllers
 
 import config.AppConfig
-import models.ServiceErrors.{Downstream_Error, Not_Allowed, Low_Confidence}
 import models.{ApiErrorResponses, RequestData}
 import play.api.mvc.*
 import services.SelfAssessmentService
@@ -29,6 +28,7 @@ import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.constants.EnrolmentConstants.*
+import utils.constants.ErrorMessageConstants.*
 
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,7 +61,7 @@ class AuthenticateRequestController(
         .recoverWith {
           case _: MissingBearerToken =>
             Future.successful(
-              Unauthorized(ApiErrorResponses(Not_Allowed.toString, "missing auth token").asJson)
+              Unauthorized(ApiErrorResponses(unauthorisedMessage).asJson)
             )
           case _: AuthorisationException =>
             selfAssessmentService
@@ -82,63 +82,33 @@ class AuthenticateRequestController(
                           block(RequestData(utr, None, request))
                         }.recoverWith { case _: AuthorisationException =>
                           Future.successful(
-                            InternalServerError(
-                              ApiErrorResponses(
-                                Downstream_Error.toString,
-                                "agent/client handshake was not established"
-                              ).asJson
-                            )
+                            InternalServerError(ApiErrorResponses(internalErrorMessage).asJson)
                           )
                         }
                       } else {
                         Future.successful(
-                          Unauthorized(
-                            ApiErrorResponses(
-                              Not_Allowed.toString,
-                              "Agents are currently not supported by our service"
-                            ).asJson
-                          )
+                          Unauthorized(ApiErrorResponses(unauthorisedMessage).asJson)
                         )
                       }
                     case _ =>
                       Future.successful(
-                        InternalServerError(
-                          ApiErrorResponses(
-                            Not_Allowed.toString,
-                            "unsupported affinity group"
-                          ).asJson
-                        )
+                        InternalServerError(ApiErrorResponses(internalErrorMessage).asJson)
                       )
                   }
                   .recoverWith { case _: AuthorisationException =>
                     Future.successful(
-                      InternalServerError(
-                        ApiErrorResponses(
-                          Downstream_Error.toString,
-                          "user didnt have any of the self assessment enrolments"
-                        ).asJson
-                      )
+                      InternalServerError(ApiErrorResponses(internalErrorMessage).asJson)
                     )
                   }
               }
               .recoverWith { case error =>
                 Future.successful(
-                  InternalServerError(
-                    ApiErrorResponses(
-                      Downstream_Error.toString,
-                      "calls to get mtdid failed for some reason"
-                    ).asJson
-                  )
+                  InternalServerError(ApiErrorResponses(internalErrorMessage).asJson)
                 )
               }
           case error =>
             Future.successful(
-              InternalServerError(
-                ApiErrorResponses(
-                  Downstream_Error.toString,
-                  "auth returned an error of some kind"
-                ).asJson
-              )
+              InternalServerError(ApiErrorResponses(internalErrorMessage).asJson)
             )
         }
     }
@@ -166,12 +136,7 @@ class AuthenticateRequestController(
 
   private val lowConfidenceResult: Future[Result] = {
     Future.successful(
-      Unauthorized(
-        ApiErrorResponses(
-          Low_Confidence.toString,
-          "user confidence level is too low"
-        ).asJson
-      )
+      Unauthorized(ApiErrorResponses(unauthorisedMessage).asJson)
     )
   }
 }
