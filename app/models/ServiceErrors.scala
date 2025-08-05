@@ -28,4 +28,12 @@ object ServiceErrors {
   case object No_NINO_Found_For_SAUTR extends ServiceErrors
   case object Not_Allowed extends ServiceErrors
   case object Low_Confidence extends ServiceErrors
+  case object Invalid_Correlation_Id extends ServiceErrors
+  case object HIP_Unauthorised extends ServiceErrors
+  case object HIP_Forbidden extends ServiceErrors
+  case object No_Payments_Found_For_UTR extends ServiceErrors
+  case object Invalid_UTR extends ServiceErrors
+  case object HIP_Server_Error extends ServiceErrors
+  case object HIP_Bad_Gateway extends ServiceErrors
+  case object HIP_Service_Unavailable extends ServiceErrors
 }

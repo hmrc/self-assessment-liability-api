@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package utils.constants
 
-import play.api.libs.json.{JsValue, Json, OFormat}
-
-case class ApiErrorResponses(message: String) extends Throwable {
-  val asJson: JsValue = Json.toJson(this)
-}
-object ApiErrorResponses {
-  implicit val format: OFormat[ApiErrorResponses] = Json.format[ApiErrorResponses]
+object ErrorMessageConstants {
+  val badRequestMessage = "Invalid request format or parameters."
+  val unauthorisedMessage = "Authorisation failed."
+  val forbiddenMessage = "Access not permitted."
+  val internalErrorMessage = "Unexpected internal error. Please contact service desk."
+  val serviceUnavailableMessage = "Service unavailable. Please try again later."
 }

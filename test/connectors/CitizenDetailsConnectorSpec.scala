@@ -55,27 +55,27 @@ class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
 
   "CitizenDetailsConnector" should {
     "return nino in case of a 200 response" in {
-      simmulateGet(serviceUrl("utr"), OK, validSuccessResponse)
+      simulateGet(serviceUrl("utr"), OK, validSuccessResponse)
       val result = connector.getNino("utr")
       result.futureValue mustBe nino
     }
     "return Invalid_SAUTR in case of a 400 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), BAD_REQUEST, "")
+      simulateGet(serviceUrl("invalidUtr"), BAD_REQUEST, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Invalid_SAUTR
     }
     "return No_NINO_Found_For_SAUTR in case of a 404 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
+      simulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe No_NINO_Found_For_SAUTR
     }
     "return More_Than_One_NINO_Found_For_SAUTR in case of a 500 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), INTERNAL_SERVER_ERROR, "")
+      simulateGet(serviceUrl("invalidUtr"), INTERNAL_SERVER_ERROR, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe More_Than_One_NINO_Found_For_SAUTR
     }
     "return Downstream_Error in case of any other responses" in {
-      simmulateGet(serviceUrl("invalidUtr"), IM_A_TEAPOT, "")
+      simulateGet(serviceUrl("invalidUtr"), IM_A_TEAPOT, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }

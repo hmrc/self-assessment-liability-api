@@ -17,12 +17,7 @@
 package controllers
 import config.AppConfig
 import models.ApiErrorResponses
-import models.ServiceErrors.{
-  Downstream_Error,
-  Low_Confidence,
-  More_Than_One_NINO_Found_For_SAUTR,
-  Not_Allowed
-}
+import models.ServiceErrors.More_Than_One_NINO_Found_For_SAUTR
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -37,6 +32,7 @@ import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.constants.ErrorMessageConstants.*
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -73,10 +69,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe UNAUTHORIZED
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Not_Allowed.toString,
-            "missing auth token"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(unauthorisedMessage).asJson
         }
       }
     }
@@ -130,10 +123,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe UNAUTHORIZED
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Low_Confidence.toString,
-            "user confidence level is too low"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(unauthorisedMessage).asJson
         }
       }
     }
@@ -196,10 +186,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe UNAUTHORIZED
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Low_Confidence.toString,
-            "user confidence level is too low"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(unauthorisedMessage).asJson
         }
       }
     }
@@ -247,10 +234,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe UNAUTHORIZED
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Not_Allowed.toString,
-            "Agents are currently not supported by our service"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(unauthorisedMessage).asJson
         }
       }
 
@@ -274,10 +258,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Downstream_Error.toString,
-            "agent/client handshake was not established"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(internalErrorMessage).asJson
         }
       }
     }
@@ -299,10 +280,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Downstream_Error.toString,
-            "calls to get mtdid failed for some reason"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(internalErrorMessage).asJson
         }
       }
 
@@ -323,10 +301,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Downstream_Error.toString,
-            "user didnt have any of the self assessment enrolments"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(internalErrorMessage).asJson
         }
       }
 
@@ -347,10 +322,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Not_Allowed.toString,
-            "unsupported affinity group"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(internalErrorMessage).asJson
         }
       }
 
@@ -367,10 +339,7 @@ class AuthenticateRequestControllerSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(utr, controller)(FakeRequest())
 
           status(result) mustBe INTERNAL_SERVER_ERROR
-          contentAsJson(result) mustBe ApiErrorResponses(
-            Downstream_Error.toString,
-            "auth returned an error of some kind"
-          ).asJson
+          contentAsJson(result) mustBe ApiErrorResponses(internalErrorMessage).asJson
         }
       }
     }

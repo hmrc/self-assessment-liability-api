@@ -16,20 +16,32 @@
 
 package services
 
-import connectors.{CitizenDetailsConnector, MtdIdentifierLookupConnector}
+import connectors.*
+import models.HipResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SelfAssessmentService @Inject() (
-    val cidConncetor: CitizenDetailsConnector,
-    mtdConnector: MtdIdentifierLookupConnector
+    val cidConnector: CitizenDetailsConnector,
+    mtdConnector: MtdIdentifierLookupConnector,
+    hipConnector: HipConnector
 )(implicit ec: ExecutionContext) {
   def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
-      nino <- cidConncetor.getNino(utr)
+      nino <- cidConnector.getNino(utr)
       mtdId <- mtdConnector.getMtdId(nino)
     } yield mtdId.mtdbsa
+  }
+
+  def getHipData(utr: String, fromDate: String)(implicit hc: HeaderCarrier): Future[HipResponse] = {
+    val toDate: String =
+      LocalDate.now.toString // TODO: DI-565 to implement logic to generate dateTo.
+
+    for {
+      hipResponse <- hipConnector.getSelfAssessmentData(utr, fromDate, toDate)
+    } yield hipResponse
   }
 }

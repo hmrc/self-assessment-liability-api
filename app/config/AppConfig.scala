@@ -25,6 +25,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val citizenDetailsLookup: String = servicesConfig.baseUrl("citizen-details")
   val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
+  val hipLookup: String = servicesConfig.baseUrl("hip")
 
   val appName: String = config.get[String]("appName")
   val agentsAllowed: Boolean = config.get[Boolean]("agentAccess")
