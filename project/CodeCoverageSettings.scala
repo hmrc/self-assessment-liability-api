@@ -12,7 +12,7 @@ object CodeCoverageSettings {
     ".*Routes.*",
     "config.*",
     "testOnly.*",
-    "controllers.DocumentationController",
+    "controllers.documentation.DocumentationController",
     "models.*",
     "testOnlyDoNotUseInAppConf.*"
   )

@@ -16,15 +16,11 @@
 
 package connectors
 
-import models.ServiceErrors.{
-  Downstream_Error,
-  Invalid_SAUTR,
-  More_Than_One_NINO_Found_For_SAUTR,
-  No_NINO_Found_For_SAUTR
-}
+import models.ServiceErrors.{Downstream_Error, Service_Currently_Unavailable}
 import play.api.Application
 import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import shared.{HttpWireMock, SpecBase}
 
 class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
@@ -57,25 +53,26 @@ class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
     "return nino in case of a 200 response" in {
       simmulateGet(serviceUrl("utr"), OK, validSuccessResponse)
       val result = connector.getNino("utr")
-      result.futureValue mustBe nino
+      result.futureValue mustBe Some(nino)
     }
-    "return Invalid_SAUTR in case of a 400 response" in {
+    "return Service_Currently_Unavailable erro in case of any other response else than 404 200 and 500" in {
       simmulateGet(serviceUrl("invalidUtr"), BAD_REQUEST, "")
       val result = connector.getNino("invalidUtr")
-      result.failed.futureValue mustBe Invalid_SAUTR
+      result.failed.futureValue mustBe Service_Currently_Unavailable
     }
-    "return No_NINO_Found_For_SAUTR in case of a 404 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
-      val result = connector.getNino("invalidUtr")
-      result.failed.futureValue mustBe No_NINO_Found_For_SAUTR
-    }
-    "return More_Than_One_NINO_Found_For_SAUTR in case of a 500 response" in {
+    "return Downstream_Error erro in case of a 500 response" in {
       simmulateGet(serviceUrl("invalidUtr"), INTERNAL_SERVER_ERROR, "")
       val result = connector.getNino("invalidUtr")
-      result.failed.futureValue mustBe More_Than_One_NINO_Found_For_SAUTR
+      result.failed.futureValue mustBe Downstream_Error
     }
-    "return Downstream_Error in case of any other responses" in {
-      simmulateGet(serviceUrl("invalidUtr"), IM_A_TEAPOT, "")
+    "return Downstream_Error erro in case of a 404 response" in {
+      simmulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
+      val result = connector.getNino("invalidUtr")
+      result.failed.futureValue mustBe Downstream_Error
+    }
+    "return Downstream_Error when JSON validation fails" in {
+      val invalidJsonResponse = Json.obj("invalidField" -> "invalidValue").toString()
+      simmulateGet(serviceUrl("nino"), OK, invalidJsonResponse)
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }

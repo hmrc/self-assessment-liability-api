@@ -17,6 +17,7 @@
 package services
 
 import connectors.{CitizenDetailsConnector, MtdIdentifierLookupConnector}
+import models.ServiceErrors.Downstream_Error
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -28,8 +29,8 @@ class SelfAssessmentService @Inject() (
 )(implicit ec: ExecutionContext) {
   def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
-      nino <- cidConncetor.getNino(utr)
-      mtdId <- mtdConnector.getMtdId(nino)
+      maybeNino <- cidConncetor.getNino(utr)
+      mtdId <- maybeNino.map(mtdConnector.getMtdId(_)).getOrElse(Future.failed(Downstream_Error))
     } yield mtdId.mtdbsa
   }
 }

@@ -8,14 +8,14 @@ servers:
   - url: https://api.service.hmrc.gov.uk
     description: Production
 paths:
-  /self-assessment/account/breakdown/{utr}:
+  /individuals/self-assessment/breakdown/{utr}:
     get:
       tags:
         - Self Assessment Account Details
       summary: Account Details
       description: |
         <b>Examples</b><br>
-        /accounts/breakdown/self-assessment/1234567890/?fromDate=2024-08-04
+        /individuals/self-assessment/breakdown/1234567890?fromDate=2024-08-04
       parameters:
         - in: header
           name: Authorization

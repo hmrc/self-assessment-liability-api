@@ -19,13 +19,21 @@ package config
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.auth.core.ConfidenceLevel
 
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val citizenDetailsLookup: String = servicesConfig.baseUrl("citizen-details")
   val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
-
   val appName: String = config.get[String]("appName")
-  val agentsAllowed: Boolean = config.get[Boolean]("agentAccess")
+
+  def confidenceLevel: ConfidenceLevel =
+    ConfidenceLevel
+      .fromInt(config.get[Int]("confidenceLevel"))
+      .getOrElse(ConfidenceLevel.L250)
+
+  lazy val apiPlatformStatus: String = servicesConfig.getString("features.api-platform.status")
+  lazy val apiPlatformEndpointsEnabled: Boolean =
+    servicesConfig.getBoolean("features.api-platform.endpoints-enabled")
 }

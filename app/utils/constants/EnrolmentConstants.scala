@@ -24,5 +24,6 @@ object EnrolmentConstants {
   val Mtd_Identifier = "MTDITID"
   val Mtd_Delegated_Auth_Rule = "mtd-it-auth"
   val ASA_Enrolment_Key = "HMRC-AS-AGENT"
+  val IR_SA_AGENT_Key = "IR-SA-AGENT"
 
 }
