@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package utils.constants
+package models
 
-object ErrorMessageConstansts {
-  val BAD_REQUEST_RESPONSE = "Invalid request format or parameters."
-  val UNAUTHORISED_RESPONSE = "Authorisation failed."
-  val FORBIDDEN_RESPONSE = "Access not permitted."
-  val INTERNAL_ERROR_RESPONSE = "Unexpected internal error. Please contact service desk."
-  val SERVICE_UNAVAILABLE_RESPONSE = "Service unavailable. Please try again later."
-  val NOT_FOUND_RESPONSE = "The requested resource could not be found."
+import play.api.libs.json.{Json, OFormat}
+
+case class HipResponse(
+    balanceDetails: BalanceDetails,
+    chargeDetails: List[ChargeDetails],
+    refundDetails: List[RefundDetails],
+    paymentHistoryDetails: List[PaymentHistoryDetails]
+)
+
+object HipResponse {
+  implicit val format: OFormat[HipResponse] = Json.format[HipResponse]
 }

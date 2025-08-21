@@ -51,28 +51,28 @@ class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
 
   "CitizenDetailsConnector" should {
     "return nino in case of a 200 response" in {
-      simmulateGet(serviceUrl("utr"), OK, validSuccessResponse)
+      simulateGet(serviceUrl("utr"), OK, validSuccessResponse)
       val result = connector.getNino("utr")
       result.futureValue mustBe Some(nino)
     }
     "return Service_Currently_Unavailable erro in case of any other response else than 404 200 and 500" in {
-      simmulateGet(serviceUrl("invalidUtr"), BAD_REQUEST, "")
+      simulateGet(serviceUrl("invalidUtr"), BAD_REQUEST, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Service_Currently_Unavailable
     }
     "return Downstream_Error erro in case of a 500 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), INTERNAL_SERVER_ERROR, "")
+      simulateGet(serviceUrl("invalidUtr"), INTERNAL_SERVER_ERROR, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }
     "return Downstream_Error erro in case of a 404 response" in {
-      simmulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
+      simulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }
     "return Downstream_Error when JSON validation fails" in {
       val invalidJsonResponse = Json.obj("invalidField" -> "invalidValue").toString()
-      simmulateGet(serviceUrl("nino"), OK, invalidJsonResponse)
+      simulateGet(serviceUrl("nino"), OK, invalidJsonResponse)
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }

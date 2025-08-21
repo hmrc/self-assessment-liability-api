@@ -16,21 +16,41 @@
 
 package services
 
-import connectors.{CitizenDetailsConnector, MtdIdentifierLookupConnector}
+import connectors.{CitizenDetailsConnector, HipConnector, MtdIdentifierLookupConnector}
 import models.ServiceErrors.Downstream_Error
+import models.HipResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SelfAssessmentService @Inject() (
-    val cidConncetor: CitizenDetailsConnector,
-    mtdConnector: MtdIdentifierLookupConnector
+    cidConncetor: CitizenDetailsConnector,
+    mtdConnector: MtdIdentifierLookupConnector,
+    hipConnector: HipConnector
 )(implicit ec: ExecutionContext) {
   def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
       maybeNino <- cidConncetor.getNino(utr)
       mtdId <- maybeNino.map(mtdConnector.getMtdId(_)).getOrElse(Future.failed(Downstream_Error))
     } yield mtdId.mtdbsa
+  }
+
+  def viewAccountService(utr: String, fromDate: Option[String])(implicit
+      hc: HeaderCarrier
+  ): Future[HipResponse] = {
+    val now: LocalDate = LocalDate.now()
+
+    val taxYears = fromDate
+      .map { date => (LocalDate.parse(date), now) }
+      .getOrElse((now.minusYears(2), now))
+    for {
+      hipResponse <- hipConnector.getSelfAssessmentData(
+        utr,
+        taxYears._1,
+        taxYears._2
+      )
+    } yield hipResponse
   }
 }

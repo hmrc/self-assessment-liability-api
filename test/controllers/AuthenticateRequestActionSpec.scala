@@ -87,7 +87,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe BAD_REQUEST
           contentAsJson(result) mustBe ApiErrorResponses(
-            badRequestMessage
+            BAD_REQUEST_RESPONSE
           ).asJson
         }
       }
@@ -98,7 +98,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe BAD_REQUEST
           contentAsJson(result) mustBe ApiErrorResponses(
-            badRequestMessage
+            BAD_REQUEST_RESPONSE
           ).asJson
         }
       }
@@ -114,7 +114,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe BAD_REQUEST
           contentAsJson(result) mustBe ApiErrorResponses(
-            badRequestMessage
+            BAD_REQUEST_RESPONSE
           ).asJson
         }
       }
@@ -132,7 +132,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(validUtr)(FakeRequest())
           status(result) mustBe SERVICE_UNAVAILABLE
           contentAsJson(result) mustBe ApiErrorResponses(
-            serviceUnavailableMessage
+            SERVICE_UNAVAILABLE_RESPONSE
           ).asJson
         }
       }
@@ -176,7 +176,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe UNAUTHORIZED
           contentAsJson(result) mustBe ApiErrorResponses(
-            unauthorisedMessage
+            UNAUTHORISED_RESPONSE
           ).asJson
         }
       }
@@ -238,7 +238,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe FORBIDDEN
           contentAsJson(result) mustBe ApiErrorResponses(
-            forbiddenMessage
+            FORBIDDEN_RESPONSE
           ).asJson
         }
       }
@@ -266,7 +266,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe SERVICE_UNAVAILABLE
           contentAsJson(result) mustBe ApiErrorResponses(
-            serviceUnavailableMessage
+            SERVICE_UNAVAILABLE_RESPONSE
           ).asJson
         }
       }
@@ -294,7 +294,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe INTERNAL_SERVER_ERROR
           contentAsJson(result) mustBe ApiErrorResponses(
-            internalErrorMEssage
+            INTERNAL_ERROR_RESPONSE
           ).asJson
         }
       }
@@ -380,7 +380,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe FORBIDDEN
           contentAsJson(result) mustBe ApiErrorResponses(
-            forbiddenMessage
+            FORBIDDEN_RESPONSE
           ).asJson
         }
       }
@@ -408,7 +408,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe SERVICE_UNAVAILABLE
           contentAsJson(result) mustBe ApiErrorResponses(
-            serviceUnavailableMessage
+            SERVICE_UNAVAILABLE_RESPONSE
           ).asJson
         }
       }
@@ -436,7 +436,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
 
           status(result) mustBe INTERNAL_SERVER_ERROR
           contentAsJson(result) mustBe ApiErrorResponses(
-            internalErrorMEssage
+            INTERNAL_ERROR_RESPONSE
           ).asJson
         }
       }
@@ -557,7 +557,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(validUtr)(FakeRequest())
           status(result) mustBe FORBIDDEN
           contentAsJson(result) mustBe ApiErrorResponses(
-            forbiddenMessage
+            FORBIDDEN_RESPONSE
           ).asJson
         }
       }
@@ -594,7 +594,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(validUtr)(FakeRequest())
           status(result) mustBe SERVICE_UNAVAILABLE
           contentAsJson(result) mustBe ApiErrorResponses(
-            serviceUnavailableMessage
+            SERVICE_UNAVAILABLE_RESPONSE
           ).asJson
         }
       }
@@ -631,7 +631,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           val result = methodNeedingAuthentication(validUtr)(FakeRequest())
           status(result) mustBe INTERNAL_SERVER_ERROR
           contentAsJson(result) mustBe ApiErrorResponses(
-            internalErrorMEssage
+            INTERNAL_ERROR_RESPONSE
           ).asJson
         }
       }

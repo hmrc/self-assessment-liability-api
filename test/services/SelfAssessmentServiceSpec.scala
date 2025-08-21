@@ -15,38 +15,36 @@
  */
 
 package services
-import connectors.{CitizenDetailsConnector, MtdIdentifierLookupConnector}
-import models.MtdId
-import models.ServiceErrors.Downstream_Error
+import connectors.{CitizenDetailsConnector, HipConnector, MtdIdentifierLookupConnector}
+import models.ServiceErrors.{Downstream_Error, Json_Validation_Error, No_Data_Found}
+import models.{MtdId, ServiceErrors}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.must.Matchers
+import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.http.HeaderCarrier
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
+import shared.{HipResponseGenerator, SpecBase}
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import scala.concurrent.Future
+import scala.util.Random
 
-class SelfAssessmentServiceSpec
-    extends AnyWordSpec
-    with Matchers
-    with MockitoSugar
-    with ScalaFutures {
-
-  implicit val ec: ExecutionContext = ExecutionContext.global
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+class SelfAssessmentServiceSpec extends SpecBase {
 
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
   val mockMtdConnector: MtdIdentifierLookupConnector = mock[MtdIdentifierLookupConnector]
+  val mockHipConnector: HipConnector = mock[HipConnector]
 
-  val service = new SelfAssessmentService(mockCitizenDetailsConnector, mockMtdConnector)
+  val service: SelfAssessmentService =
+    new SelfAssessmentService(mockCitizenDetailsConnector, mockMtdConnector, mockHipConnector)
 
   val testUtr = "1234567890"
   val testNino = "AB123456C"
   val testMtdId = "XAIT0000123456"
 
-  "SelfAssessmentService" should {
+  "getMtdIdFromUtr" should {
     "return mtdId when both connectors return successful responses" in {
       when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
         .thenReturn(Future.successful(Some(testNino)))
@@ -101,6 +99,52 @@ class SelfAssessmentServiceSpec
       val result = service.getMtdIdFromUtr(testUtr)
 
       result.futureValue mustBe testMtdId
+    }
+  }
+  "viewAccountService" should {
+
+    "Enquire for self assessment data starting with fromDate provided until today's date" in {
+      val today = LocalDate.now()
+      forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
+        when(
+          mockHipConnector.getSelfAssessmentData(
+            meq("utr"),
+            meq(today.minusYears(2)),
+            meq(today)
+          )(any(), any())
+        ).thenReturn(Future.successful(hipResponse))
+        val result = service.viewAccountService("utr", None)
+        result.futureValue shouldBe hipResponse
+      }
+    }
+    "Enquire for self assessment data with start date provided until today's date" in {
+      val today = LocalDate.now()
+      forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
+        when(
+          mockHipConnector.getSelfAssessmentData(
+            meq("utr"),
+            meq(today.minusYears(4)),
+            meq(today)
+          )(any(), any())
+        ).thenReturn(Future.successful(hipResponse))
+        val result = service.viewAccountService("utr", Some(today.minusYears(4).toString))
+        result.futureValue shouldBe hipResponse
+      }
+    }
+
+    "Return failure if call to hip fails" in {
+      val today = LocalDate.now()
+      val randomError: ServiceErrors =
+        Random().shuffle(List(Json_Validation_Error, No_Data_Found, Downstream_Error)).head
+      when(
+        mockHipConnector.getSelfAssessmentData(
+          meq("utr"),
+          meq(today.minusYears(2)),
+          meq(today)
+        )(any(), any())
+      ).thenReturn(Future.failed(randomError))
+      val result = service.viewAccountService("utr", None)
+      result.failed.futureValue mustEqual randomError
     }
   }
 }
