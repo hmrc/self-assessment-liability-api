@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package utils.constants
+package models
 
-object ErrorMessageConstansts {
-  val BAD_REQUEST_RESPONSE = "Invalid request format or parameters."
-  val UNAUTHORISED_RESPONSE = "Authorisation failed."
-  val FORBIDDEN_RESPONSE = "Access not permitted."
-  val INTERNAL_ERROR_RESPONSE = "Unexpected internal error. Please contact service desk."
-  val SERVICE_UNAVAILABLE_RESPONSE = "Service unavailable. Please try again later."
-  val NOT_FOUND_RESPONSE = "The requested resource could not be found."
+import play.api.libs.json.{Json, OFormat}
+
+import java.time.LocalDate
+
+case class PaymentHistoryDetails(
+    paymentAmount: BigDecimal,
+    paymentReference: String,
+    paymentMethod: Option[String],
+    paymentDate: LocalDate,
+    processedDate: Option[LocalDate],
+    allocationReference: List[String]
+)
+
+object PaymentHistoryDetails {
+  implicit val format: OFormat[PaymentHistoryDetails] = Json.format[PaymentHistoryDetails]
 }

@@ -42,7 +42,7 @@ trait HttpWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {
     server.stop()
   }
 
-  protected def simmulateGet(
+  protected def simulateGet(
       expectedEndpoint: String,
       expectedStatus: Int,
       expectedBody: String
