@@ -356,7 +356,6 @@ components:
                 allOf:
                   - type: object
                     required:
-                      - refundDate
                       - totalRefundAmount
                       - refundRequestAmount
                     properties:

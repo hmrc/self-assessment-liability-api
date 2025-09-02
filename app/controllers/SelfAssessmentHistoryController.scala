@@ -16,23 +16,49 @@
 
 package controllers
 
-import config.AppConfig
+import models.ApiErrorResponses
+import models.ServiceErrors.{
+  Downstream_Error,
+  Json_Validation_Error,
+  No_Data_Found,
+  Service_Currently_Unavailable
+}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import services.SelfAssessmentService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.constants.ErrorMessageConstansts.{
+  BAD_REQUEST_RESPONSE,
+  INTERNAL_ERROR_RESPONSE,
+  NOT_FOUND_RESPONSE,
+  SERVICE_UNAVAILABLE_RESPONSE
+}
 
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class SelfAssessmentHistoryController @Inject() (
     authenticate: AuthenticateRequestAction,
-    cc: ControllerComponents
-)(implicit appConfig: AppConfig, ec: ExecutionContext)
+    cc: ControllerComponents,
+    service: SelfAssessmentService
+)(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
   def getYourSelfAssessmentData(utr: String, fromDate: Option[String]): Action[AnyContent] =
-    authenticate(utr) { implicit request =>
-      Ok(Json.obj("message" -> "Success!"))
+    authenticate(utr).async { implicit request =>
+      (for {
+        selfAssessmentData <- service.viewAccountService(utr, fromDate)
+      } yield Ok(Json.toJson(selfAssessmentData)))
+        .recover {
+          case _: DateTimeParseException =>
+            BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson)
+          case Json_Validation_Error | Downstream_Error =>
+            InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson)
+          case No_Data_Found => NotFound(ApiErrorResponses(NOT_FOUND_RESPONSE).asJson)
+          case Service_Currently_Unavailable =>
+            ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson)
+        }
     }
 
 }

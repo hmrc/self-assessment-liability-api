@@ -81,12 +81,12 @@ class AuthenticateRequestAction @Inject() (
           }
           .recover {
             case _: NoActiveSession =>
-              BadRequest(ApiErrorResponses(badRequestMessage).asJson)
+              BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson)
             case _ =>
-              ServiceUnavailable(ApiErrorResponses(serviceUnavailableMessage).asJson)
+              ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson)
           }
       } else {
-        Future.successful(BadRequest(ApiErrorResponses(badRequestMessage).asJson))
+        Future.successful(BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson))
       }
     }
 
@@ -97,7 +97,7 @@ class AuthenticateRequestAction @Inject() (
         block: RequestData[A] => Future[Result]
     )(implicit hc: HeaderCarrier): Future[Result] = {
       if (confidenceLevel < config.confidenceLevel) {
-        Unauthorized(ApiErrorResponses(unauthorisedMessage).asJson).toFuture
+        Unauthorized(ApiErrorResponses(UNAUTHORISED_RESPONSE).asJson).toFuture
       } else {
         dealWithNonAgentAffinity(utr, request, block)
       }
@@ -120,11 +120,11 @@ class AuthenticateRequestAction @Inject() (
           }
           .recoverWith {
             case _: AuthorisationException =>
-              Forbidden(ApiErrorResponses(forbiddenMessage).asJson).toFuture
+              Forbidden(ApiErrorResponses(FORBIDDEN_RESPONSE).asJson).toFuture
             case Downstream_Error =>
-              InternalServerError(ApiErrorResponses(internalErrorMEssage).asJson).toFuture
+              InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson).toFuture
             case _ =>
-              ServiceUnavailable(ApiErrorResponses(serviceUnavailableMessage).asJson).toFuture
+              ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson).toFuture
           }
       }
     }
@@ -147,11 +147,11 @@ class AuthenticateRequestAction @Inject() (
             }
         }.recoverWith {
           case _: AuthorisationException =>
-            Forbidden(ApiErrorResponses(forbiddenMessage).asJson).toFuture
+            Forbidden(ApiErrorResponses(FORBIDDEN_RESPONSE).asJson).toFuture
           case Downstream_Error =>
-            InternalServerError(ApiErrorResponses(internalErrorMEssage).asJson).toFuture
+            InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson).toFuture
           case _ =>
-            ServiceUnavailable(ApiErrorResponses(serviceUnavailableMessage).asJson).toFuture
+            ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson).toFuture
         }
       }
     }

@@ -33,17 +33,26 @@
 package controllers
 
 import models.RequestData
-import org.mockito.ArgumentMatchers.any
+import models.ServiceErrors.{
+  Downstream_Error,
+  Json_Validation_Error,
+  No_Data_Found,
+  Service_Currently_Unavailable
+}
+import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.inject
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import shared.SpecBase
+import services.SelfAssessmentService
+import shared.{HipResponseGenerator, SpecBase}
 
+import java.time.format.DateTimeParseException
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 class SelfAssessmentHistoryControllerSpec extends SpecBase {
@@ -68,19 +77,60 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
     }
     mockAuth
   }
-  val bodyParser: PlayBodyParsers = app.injector.instanceOf[PlayBodyParsers]
 
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
-    GET,
-    routes.SelfAssessmentHistoryController.getYourSelfAssessmentData("1234567890", None).url
-  )
+  val bodyParser: PlayBodyParsers = app.injector.instanceOf[PlayBodyParsers]
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, "/1234567890")
+  val mockService: SelfAssessmentService = mock[SelfAssessmentService]
 
   "SelfAssessmentHistoryController" should {
     "return OK with success message" in {
+      forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
+
+        when(mockService.viewAccountService(meq("1234567890"), meq(Some("2024-05-01")))(any()))
+          .thenReturn(Future.successful(hipResponse))
+
+        val application = new GuiceApplicationBuilder()
+          .overrides(
+            inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser)),
+            inject.bind[SelfAssessmentService].toInstance(mockService)
+          )
+          .build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[SelfAssessmentHistoryController]
+          val result =
+            controller.getYourSelfAssessmentData("1234567890", Some("2024-05-01"))(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsJson(result) mustBe Json.toJson(hipResponse)
+        }
+      }
+    }
+
+    "return bad request if a date with bad format is provided" in {
+      when(mockService.viewAccountService(meq("1234567890"), any())(any()))
+        .thenReturn(Future.failed(DateTimeParseException("s", "s", 2)))
+      val application = new GuiceApplicationBuilder()
+        .overrides(
+          inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser)),
+          inject.bind[SelfAssessmentService].toInstance(mockService)
+        )
+        .build()
+
+      val controller = application.injector.instanceOf[SelfAssessmentHistoryController]
+      val result = controller.getYourSelfAssessmentData("1234567890", None)(fakeRequest)
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj("message" -> "Invalid request format or parameters.")
+    }
+
+    "return Internal server error json validation on HIP response fails" in {
+      when(mockService.viewAccountService(meq("1234567890"), any())(any()))
+        .thenReturn(Future.failed(Json_Validation_Error))
 
       val application = new GuiceApplicationBuilder()
         .overrides(
-          inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser))
+          inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser)),
+          inject.bind[SelfAssessmentService].toInstance(mockService)
         )
         .build()
 
@@ -88,8 +138,53 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
         val controller = application.injector.instanceOf[SelfAssessmentHistoryController]
         val result = controller.getYourSelfAssessmentData("1234567890", None)(fakeRequest)
 
-        status(result) mustBe OK
-        contentAsJson(result) mustBe Json.obj("message" -> "Success!")
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        contentAsJson(result) mustBe Json.obj(
+          "message" -> "Unexpected internal error. Please contact service desk."
+        )
+      }
+    }
+
+    "return not found if no data is found in HIP for the utr provided" in {
+      when(mockService.viewAccountService(meq("1234567890"), any())(any()))
+        .thenReturn(Future.failed(No_Data_Found))
+
+      val application = new GuiceApplicationBuilder()
+        .overrides(
+          inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser)),
+          inject.bind[SelfAssessmentService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[SelfAssessmentHistoryController]
+        val result = controller.getYourSelfAssessmentData("1234567890", None)(fakeRequest)
+
+        status(result) mustBe NOT_FOUND
+        contentAsJson(result) mustBe Json.obj(
+          "message" -> "The requested resource could not be found."
+        )
+      }
+    }
+    "return service unavailable if call to HIP fails" in {
+      when(mockService.viewAccountService(meq("1234567890"), any())(any()))
+        .thenReturn(Future.failed(Service_Currently_Unavailable))
+
+      val application = new GuiceApplicationBuilder()
+        .overrides(
+          inject.bind[AuthenticateRequestAction].toInstance(createBypassAuthAction()(bodyParser)),
+          inject.bind[SelfAssessmentService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[SelfAssessmentHistoryController]
+        val result = controller.getYourSelfAssessmentData("1234567890", None)(fakeRequest)
+
+        status(result) mustBe SERVICE_UNAVAILABLE
+        contentAsJson(result) mustBe Json.obj(
+          "message" -> "Service unavailable. Please try again later."
+        )
       }
     }
   }
