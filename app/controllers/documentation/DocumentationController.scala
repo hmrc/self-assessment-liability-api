@@ -18,7 +18,6 @@ package controllers.documentation
 
 import config.AppConfig
 import controllers.Assets
-import org.apache.pekko.event.Logging
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}

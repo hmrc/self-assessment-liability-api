@@ -41,8 +41,6 @@ import models.ServiceErrors.{
   Json_Validation_Error,
   No_Data_Found_Error
 }
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito.when
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
@@ -59,8 +57,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 class SelfAssessmentHistoryControllerSpec extends SpecBase {
-  implicit lazy val system: ActorSystem = ActorSystem()
-  implicit lazy val materializer: Materializer = Materializer(system)
+
   val mockService: SelfAssessmentService = mock[SelfAssessmentService]
   val authConnector: AuthConnector = mock[AuthConnector]
   val cc: ControllerComponents = app.injector.instanceOf[ControllerComponents]
@@ -76,6 +73,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
 
       override protected def executionContext: ExecutionContext = ec
     }
+
   val controller: SelfAssessmentHistoryController =
     new SelfAssessmentHistoryController(fakeAuthenticaAction, fakeValidateAction, cc, mockService)
   def request(utr: String, fromDate: LocalDate): Future[Result] = {

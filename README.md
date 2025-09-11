@@ -162,14 +162,9 @@ More detail can be found in the [service guide error responses](https://develope
 This API interacts with internal HMRC services to fetch relevant data. For testing purposes, this API does not interact with the live version of these services but rather a fake _stub_. This _stub_ is a single service which simulates various responses for different request URLs and parameters. The _stub_ service can be found [here](https://github.com/hmrc/self-assessment-liability-stub).
 
 ## Testing
-
-This API uses `sbt` to `clean`, `compile`, `test` and `run` the service.
-
-### Unit testing
-
-Unit tests can be run from the project root with the following command:
-```console
-sbt test
+Use the following command to run both unit and integration tests
+```shell
+sbt 'testAll'
 ```
 
 ### API testing

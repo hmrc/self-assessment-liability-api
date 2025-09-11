@@ -21,7 +21,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.http.*
 import play.api.mvc.*
 import play.api.test.*
@@ -41,9 +41,8 @@ trait SpecBase
     with HttpProtocol
     with Status
     with Writeables
-    with GuiceOneAppPerSuite {
+    with GuiceOneServerPerSuite {
 
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
-
 }

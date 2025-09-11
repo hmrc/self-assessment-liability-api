@@ -30,6 +30,7 @@ class MtdIdentifierLookupConnectorSpec extends SpecBase with HttpWireMock {
       conf = "microservice.services.mtd-id-lookup.port" -> server.port()
     )
     .build()
+
   private lazy val connector: MtdIdentifierLookupConnector =
     app.injector.instanceOf[MtdIdentifierLookupConnector]
   private def serviceUrl(nino: String) = s"/mtd-identifier-lookup/nino/$nino"
