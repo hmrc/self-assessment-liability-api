@@ -37,14 +37,13 @@ class SelfAssessmentHistoryController @Inject() (
 
   def getYourSelfAssessmentData(utr: String, fromDate: Option[String]): Action[AnyContent] =
     (Action andThen validateRequest(utr) andThen authenticateUser).async { implicit request =>
-      for {
-        selfAssessmentData <-
-          service.viewAccountService(
-            utr,
-            request.requestPeriod.startDate,
-            request.requestPeriod.endDate
-          )
-      } yield Ok(Json.toJson(selfAssessmentData))
+      service
+        .viewAccountService(
+          utr,
+          request.requestPeriod.startDate,
+          request.requestPeriod.endDate
+        )
+        .map(hipResponse => Ok(Json.toJson(hipResponse)))
     }
 
 }
