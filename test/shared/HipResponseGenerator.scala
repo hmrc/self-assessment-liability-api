@@ -23,7 +23,7 @@ import java.time.{LocalDate, ZoneId}
 
 object HipResponseGenerator {
 
-  def formatTaxYear(year: String) = {
+  def formatTaxYear(year: String): String = {
     val startYear = year.toInt
     val endYear = (startYear + 1)
     s"$startYear-$endYear"
