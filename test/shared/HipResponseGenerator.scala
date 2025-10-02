@@ -75,16 +75,17 @@ object HipResponseGenerator {
       "Correction",
       "Late Filing Penalty",
       "Interest Adjustment",
-      "Manual Override"
+      "Manual Override",
+      "Payment"
     )
-    updatedChargeAmount <- Gen.option(Gen.choose(0.0, 50000.0)).map(_.map(BigDecimal(_)))
+    isPaymentRelated <- Gen.const(amendmentReason == "Payment")
     paymentMethod <- Gen.option(Gen.oneOf("Bank Transfer", "Credit Card", "Cheque", "Direct Debit"))
     paymentDate <- Gen.option(localDateGen)
   } yield Amendment(
     amendmentDate = amendmentDate,
     amendmentAmount = amendmentAmount,
     amendmentReason = amendmentReason,
-    updatedChargeAmount = updatedChargeAmount,
+    isPaymentRelated = isPaymentRelated,
     paymentMethod = paymentMethod,
     paymentDate = paymentDate
   )
