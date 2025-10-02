@@ -24,7 +24,7 @@ case class Amendment(
     amendmentDate: LocalDate,
     amendmentAmount: BigDecimal,
     amendmentReason: String,
-    updatedChargeAmount: Option[BigDecimal] = None,
+    isPaymentRelated: Boolean,
     paymentMethod: Option[String],
     paymentDate: Option[LocalDate]
 )

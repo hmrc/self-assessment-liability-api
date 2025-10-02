@@ -281,6 +281,7 @@ components:
                                     - amendmentAmount
                                     - amendmentDate
                                     - amendmentReason
+                                    - isPaymentRelated
                                   type: object
                                   properties:
                                     amendmentDate:
@@ -297,10 +298,10 @@ components:
                                         - type: string
                                           minLength: 1
                                           maxLength: 100
-                                    updatedChargeAmount:
-                                      description: "Outstanding charge balance after an amendment."
+                                    isPaymentRelated:
                                       allOf:
-                                        - $ref: "#/components/schemas/amountType_11_2"
+                                        - type: boolean
+                                          default: true
                                     paymentMethod:
                                       description: "How the payment was made (e.g. bank transfer)."
                                       allOf:
@@ -503,8 +504,8 @@ components:
             amendments:
               - amendmentDate: '2025-04-15'
                 amendmentAmount: 500
-                updatedChargeAmount: 750
                 amendmentReason: 'Payment'
+                isPaymentRelated: true
                 paymentMethod: bank_transfer
                 paymentDate: '2025-04-10'
           - chargeId: EF2345678
@@ -520,10 +521,10 @@ components:
               interestEndDate: '2024-12-01'
             accruingInterestRate: 0.05
             amendments:
-              - updatedChargeAmount: 2000
-                amendmentDate: '2024-12-08'
+              - amendmentDate: '2024-12-08'
                 amendmentAmount: 2058.33
                 amendmentReason: 'Payment'
+                isPaymentRelated: true
                 paymentMethod: bank_transfer
                 paymentDate: '2024-12-03'
           - chargeId: KL3456789
