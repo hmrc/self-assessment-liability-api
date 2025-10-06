@@ -144,6 +144,12 @@ components:
       minimum: -9.999999999999E10
       maximum: 9.999999999999E10
       multipleOf: 0.01
+    positiveType:
+      description: "All numeric fields. 13-digits total with 2 decimal places and positive"
+      type: "number"
+      minimum: 0.00
+      maximum: 9.999999999999E10
+      multipleOf: 0.01
     dateType:
       allOf:
         - type: string

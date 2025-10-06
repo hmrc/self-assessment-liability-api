@@ -27,7 +27,9 @@ case class PaymentHistoryDetails(
     paymentDate: LocalDate,
     processedDate: Option[LocalDate],
     allocationReference: List[String]
-)
+) {
+  require(paymentAmount > 0)
+}
 
 object PaymentHistoryDetails {
   implicit val format: OFormat[PaymentHistoryDetails] = Json.format[PaymentHistoryDetails]

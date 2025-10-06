@@ -24,7 +24,9 @@ case class CodedOutDetail(
     totalAmount: BigDecimal,
     effectiveStartDate: LocalDate,
     effectiveEndDate: LocalDate
-)
+) {
+  require(totalAmount > 0)
+}
 
 object CodedOutDetail {
   implicit val format: OFormat[CodedOutDetail] = Json.format[CodedOutDetail]
