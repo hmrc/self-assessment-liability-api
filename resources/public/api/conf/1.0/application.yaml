@@ -144,7 +144,7 @@ components:
       minimum: -9.999999999999E10
       maximum: 9.999999999999E10
       multipleOf: 0.01
-    positiveType:
+    positiveAmountType:
       description: "All numeric fields. 13-digits total with 2 decimal places and positive"
       type: "number"
       minimum: 0.00
@@ -187,11 +187,11 @@ components:
                 totalOverdueBalance:
                   description: "Total of all charges with a due date in the past."
                   allOf:
-                    - $ref: "#/components/schemas/amountType_11_2"
+                    - $ref: "#/components/schemas/positiveAmountType"
                 totalPayableBalance:
                   description: "Total of all charges due within the next 30 days."
                   allOf:
-                    - $ref: "#/components/schemas/amountType_11_2"
+                    - $ref: "#/components/schemas/positiveAmountType"
                 earliestPayableDueDate:
                   description: "The earliest due date for charges due within the next 30 days."
                   allOf:
@@ -199,7 +199,7 @@ components:
                 totalPendingBalance:
                   description: "Total of all charges due in 30 days or more."
                   allOf:
-                    - $ref: "#/components/schemas/amountType_11_2"
+                    - $ref: "#/components/schemas/positiveAmountType"
                 earliestPendingDueDate:
                   description: "The earliest due date for charges due in 30 days or more."
                   allOf:
@@ -207,11 +207,11 @@ components:
                 totalBalance:
                   description: "Combined total of overdue, payable, and pending charges."
                   allOf:
-                    - $ref: "#/components/schemas/amountType_11_2"
+                    - $ref: "#/components/schemas/positiveAmountType"
                 totalCreditAvailable:
                   description: "Total credit currently accrued on the account."
                   allOf:
-                    - $ref: "#/components/schemas/amountType_11_2"
+                    - $ref: "#/components/schemas/positiveAmountType"
                 codedOutDetail:
                   description: "Coded out liabilities"
                   allOf:
@@ -222,7 +222,7 @@ components:
                           totalAmount:
                             description: "Total past/future amount adjustments via taxcode changes."
                             allOf:
-                              - $ref: "#/components/schemas/amountType_11_2"
+                              - $ref: "#/components/schemas/positiveAmountType"
                           effectiveStartDate:
                             description: "Effective start date of coding"
                             allOf:
@@ -261,7 +261,7 @@ components:
                       accruingInterest:
                         description: "Interest currently accruing on the charge."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       accruingInterestPeriod:
                         description: "The date range over which interest applies to this charge."
                         allOf:
@@ -276,7 +276,7 @@ components:
                       accruingInterestRate:
                         description: "The current interest rate being applied."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       amendments:
                         allOf:
                           - type: array
@@ -306,7 +306,7 @@ components:
                                     updatedChargeAmount:
                                       description: "Outstanding charge balance after an amendment."
                                       allOf:
-                                        - $ref: "#/components/schemas/amountType_11_2"
+                                        - $ref: "#/components/schemas/positiveAmountType"
                                     paymentMethod:
                                       description: "How the payment was made (e.g. bank transfer)."
                                       allOf:
@@ -332,7 +332,7 @@ components:
                       chargeAmount:
                         description: "The original amount of the charge."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       creationDate:
                         description: "Date the charge was created."
                         allOf:
@@ -344,11 +344,11 @@ components:
                       outstandingInterestDue:
                         description: "Amount of interest unpaid from the total accrued interest."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       outstandingAmount:
                         description: "Remaining balance on the charge still to be paid."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       taxYear:
                         description: "The tax year the charge relates to."
                         allOf:
@@ -372,11 +372,11 @@ components:
                       interestAddedToRefund:
                         description: "Any interest added to the refund at the point of processing."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       totalRefundAmount:
                         description: "The total amount refunded, including any added interest."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       refundMethod:
                         description: "The method that was used to make the refund (BACS etc)."
                         allOf:
@@ -390,7 +390,7 @@ components:
                       refundRequestAmount:
                         description: "The amount requested for refund."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       refundRequestDate:
                         description: "The date that the refund was requested."
                         allOf:
@@ -426,7 +426,7 @@ components:
                       paymentAmount:
                         description: "The amount that was paid."
                         allOf:
-                          - $ref: "#/components/schemas/amountType_11_2"
+                          - $ref: "#/components/schemas/positiveAmountType"
                       paymentMethod:
                         description: "How the payment was made (e.g. bank transfer, card)."
                         allOf:

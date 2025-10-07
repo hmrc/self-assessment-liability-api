@@ -163,9 +163,9 @@ class GlobalErrorHandlerSpec extends AnyWordSpec with Matchers with MockitoSugar
       "return ServiceUnavailable for any other exception" in {
         val genericException = new RuntimeException("Generic runtime exception")
         val nullPointerException = new NullPointerException("Null pointer exception")
-        val illegalArgumentException = new IllegalArgumentException("Illegal argument")
+        val noSuchElementException = new NoSuchElementException("Element not found")
         val randomException = new Random()
-          .shuffle(List(genericException, nullPointerException, illegalArgumentException))
+          .shuffle(List(genericException, nullPointerException, noSuchElementException))
           .head
         val result: Future[Result] = errorHandler.onServerError(fakeRequest, randomException)
 
