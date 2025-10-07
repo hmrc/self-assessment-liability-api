@@ -313,10 +313,10 @@ components:
                                         - $ref: "#/components/schemas/dateType"
                                   additionalProperties: false
                       chargeId:
-                        description: "Unique identifier for the charge."
+                        description: "The unique identifier for the charge."
                         allOf:
                           - type: string
-                            pattern: ^[0-9]{1,12}$
+                            pattern: ^[A-Za-z0-9-]{1,18}$
                       chargeType:
                         description: "Type of charge (e.g. ITSA, NICS, POA)."
                         allOf:
