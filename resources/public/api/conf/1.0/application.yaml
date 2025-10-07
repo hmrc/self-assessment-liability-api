@@ -301,7 +301,6 @@ components:
                                     isPaymentRelated:
                                       allOf:
                                         - type: boolean
-                                          default: true
                                     paymentMethod:
                                       description: "How the payment was made (e.g. bank transfer)."
                                       allOf:
