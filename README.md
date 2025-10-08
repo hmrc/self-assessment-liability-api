@@ -63,8 +63,8 @@ More detail can be found in the [service guide error responses](https://develope
         {
           "amendmentDate": "2025-04-15",
           "amendmentAmount": 500,
-          "updatedChargeAmount": 750,
           "amendmentReason": "Payment",
+          "isPaymentRelated": true,
           "paymentMethod": "bank_transfer",
           "paymentDate": "2025-04-10"
         }
@@ -86,10 +86,10 @@ More detail can be found in the [service guide error responses](https://develope
       "accruingInterestRate": 0.05,
       "amendments": [
         {
-          "updatedChargeAmount": 2000,
           "amendmentDate": "2024-12-08",
           "amendmentAmount": 2058.33,
           "amendmentReason": "Payment",
+          "isPaymentRelated": true,
           "paymentMethod": "bank_transfer",
           "paymentDate": "2024-12-03"
         }

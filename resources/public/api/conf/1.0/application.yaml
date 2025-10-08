@@ -287,6 +287,7 @@ components:
                                     - amendmentAmount
                                     - amendmentDate
                                     - amendmentReason
+                                    - isPaymentRelated
                                   type: object
                                   properties:
                                     amendmentDate:
@@ -303,9 +304,9 @@ components:
                                         - type: string
                                           minLength: 1
                                           maxLength: 100
-                                    updatedChargeAmount:
-                                      description: "Outstanding charge balance after an amendment."
+                                    isPaymentRelated:
                                       allOf:
+                                        - type: boolean
                                         - $ref: "#/components/schemas/positiveAmountType"
                                     paymentMethod:
                                       description: "How the payment was made (e.g. bank transfer)."
@@ -319,10 +320,10 @@ components:
                                         - $ref: "#/components/schemas/dateType"
                                   additionalProperties: false
                       chargeId:
-                        description: "Unique identifier for the charge."
+                        description: "The unique identifier for the charge."
                         allOf:
                           - type: string
-                            pattern: ^[0-9]{1,12}$
+                            pattern: ^[A-Za-z0-9-]{1,18}$
                       chargeType:
                         description: "Type of charge (e.g. ITSA, NICS, POA)."
                         allOf:
@@ -438,7 +439,7 @@ components:
                         allOf:
                           - type: string
                             minLength: 1
-                            maxLength: 35
+                            maxLength: 30
                       paymentDate:
                         description: "The date payment was made."
                         allOf:
@@ -509,8 +510,8 @@ components:
             amendments:
               - amendmentDate: '2025-04-15'
                 amendmentAmount: 500
-                updatedChargeAmount: 750
                 amendmentReason: 'Payment'
+                isPaymentRelated: true
                 paymentMethod: bank_transfer
                 paymentDate: '2025-04-10'
           - chargeId: EF2345678
@@ -526,10 +527,10 @@ components:
               interestEndDate: '2024-12-01'
             accruingInterestRate: 0.05
             amendments:
-              - updatedChargeAmount: 2000
-                amendmentDate: '2024-12-08'
+              - amendmentDate: '2024-12-08'
                 amendmentAmount: 2058.33
                 amendmentReason: 'Payment'
+                isPaymentRelated: true
                 paymentMethod: bank_transfer
                 paymentDate: '2024-12-03'
           - chargeId: KL3456789
