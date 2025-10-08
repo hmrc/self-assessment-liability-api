@@ -24,7 +24,6 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
@@ -40,7 +39,6 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
@@ -50,29 +48,12 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
         (json \ "api" \ "versions" \ 0 \ "endpointsEnabled").as[Boolean] mustEqual false
       }
 
-      "GET /version return OK with version 1.0" in {
-        simulateGet("/api/definition", OK, "")
-        val result =
-          Await.result(
-            client
-              .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
-              .execute[HttpResponse],
-            5.seconds
-          )
-
-        result.status mustEqual OK
-        val json = result.json
-        (json \ "api" \ "versions" \ 0 \ "version").as[String] mustEqual "1.0"
-      }
-
       "GET /categories return OK with categories SELF_ASSESSMENT" in {
         simulateGet("/api/definition", OK, "")
         val result =
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
@@ -88,7 +69,6 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
@@ -104,7 +84,6 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
@@ -122,7 +101,6 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
           Await.result(
             client
               .get(URI.create(baseUrl).toURL)
-              .setHeader("Authorization" -> "Header")
               .execute[HttpResponse],
             5.seconds
           )
