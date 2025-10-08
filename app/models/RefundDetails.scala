@@ -29,7 +29,9 @@ case class RefundDetails(
     interestAddedToRefund: Option[BigDecimal],
     totalRefundAmount: BigDecimal,
     refundStatus: Option[String]
-)
+) {
+  require(refundRequestAmount > 0 && totalRefundAmount > 0)
+}
 
 object RefundDetails {
   implicit val format: OFormat[RefundDetails] = Json.format[RefundDetails]

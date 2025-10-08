@@ -33,7 +33,9 @@ case class ChargeDetails(
     accruingInterestPeriod: Option[AccruingInterestPeriod],
     accruingInterestRate: Option[BigDecimal],
     amendments: List[Amendment]
-)
+) {
+  require(chargeAmount > 0 && outstandingAmount > 0)
+}
 
 object ChargeDetails {
   implicit val format: OFormat[ChargeDetails] = Json.format[ChargeDetails]
