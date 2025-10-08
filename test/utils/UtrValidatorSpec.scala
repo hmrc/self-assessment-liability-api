@@ -20,21 +20,24 @@ import shared.SpecBase
 
 class UtrValidatorSpec extends SpecBase {
 
+  // List of valid values used for unit test
+  val validList = List("1234567890", "12345")
+
+  // List of invalid values used for unit test
+  val invalidList = List("", "12345678901", "ABC@123", "ABC123", "A12345678", "AB123")
+
   "UtrValidator" should {
-    "return true for valid UTRs" in {
-      UtrValidator.isValidUtr("1234567890") mustBe true
-      UtrValidator.isValidUtr("12345") mustBe true
 
-    }
+    validList.foreach(validList =>
+      s"return true for valid UTRs $validList" in {
+        UtrValidator.isValidUtr(s"$validList") mustEqual true
+      }
+    )
 
-    "return false for invalid UTRs" in {
-      UtrValidator.isValidUtr("") mustBe false
-      UtrValidator.isValidUtr("12345678901") mustBe false
-      UtrValidator.isValidUtr("ABC@123") mustBe false
-      UtrValidator.isValidUtr("ABC123") mustBe false
-      UtrValidator.isValidUtr("A12345678") mustBe false
-      UtrValidator.isValidUtr("AB123") mustBe false
-    }
+    invalidList.foreach(invalidList =>
+      s"return false for invalid UTRs $invalidList" in {
+        UtrValidator.isValidUtr(s"$invalidList") mustEqual false
+      }
+    )
   }
-
 }

@@ -23,6 +23,12 @@ import java.time.{LocalDate, ZoneId}
 
 object HipResponseGenerator {
 
+  def formatTaxYear(year: String): String = {
+    val startYear = year.toInt
+    val endYear = (startYear + 1)
+    s"$startYear-$endYear"
+  }
+
   val localDateGen: Gen[LocalDate] = for {
     year <- Gen.choose(LocalDate.now().minusYears(7).getYear, LocalDate.now().getYear)
     date <- Gen.calendar.map(c => LocalDate.ofInstant(c.toInstant, ZoneId.of("UTC")).withYear(year))
@@ -75,16 +81,17 @@ object HipResponseGenerator {
       "Correction",
       "Late Filing Penalty",
       "Interest Adjustment",
-      "Manual Override"
+      "Manual Override",
+      "Payment"
     )
-    updatedChargeAmount <- Gen.option(Gen.choose(0.0, 50000.0)).map(_.map(BigDecimal(_)))
+    isPaymentRelated <- Gen.const(amendmentReason == "Payment")
     paymentMethod <- Gen.option(Gen.oneOf("Bank Transfer", "Credit Card", "Cheque", "Direct Debit"))
     paymentDate <- Gen.option(localDateGen)
   } yield Amendment(
     amendmentDate = amendmentDate,
     amendmentAmount = amendmentAmount,
     amendmentReason = amendmentReason,
-    updatedChargeAmount = updatedChargeAmount,
+    isPaymentRelated = isPaymentRelated,
     paymentMethod = paymentMethod,
     paymentDate = paymentDate
   )
@@ -95,7 +102,7 @@ object HipResponseGenerator {
     chargeType <- Gen.oneOf("Income Tax", "VAT", "Corporation Tax", "PAYE", "National Insurance")
     chargeAmount <- Gen.choose(1.0, 100000.0).map(BigDecimal(_))
     outstandingAmount <- Gen.choose(0.0, 50000.0).map(BigDecimal(_))
-    taxYear <- Gen.choose(2020, 2025).map(year => s"$year-${year + 1}")
+    taxYear <- Gen.choose(2020, 2025).map(year => formatTaxYear(year.toString))
     dueDate <- localDateGen
     outstandingInterestDue <- Gen.option(Gen.choose(0.0, 5000.0)).map(_.map(BigDecimal(_)))
     accruingInterest <- Gen.option(Gen.choose(0.0, 1000.0)).map(_.map(BigDecimal(_)))
