@@ -40,7 +40,9 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
         case response if response.status == 500 => Future.failed(Downstream_Error)
         case response if response.status == 400 => Future.failed(Downstream_Error)
         case response =>
-          logger.warn(s"call to ${appConfig.mtdIdLookup}/mtd-identifier-lookup/ failed with ${response.status} status")
+          logger.warn(
+            s"call to ${appConfig.mtdIdLookup}/mtd-identifier-lookup/ failed with ${response.status} status"
+          )
           Future.failed(Service_Currently_Unavailable_Error)
       }
       .recoverWith { case _: JsResultException =>
