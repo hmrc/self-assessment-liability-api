@@ -307,7 +307,6 @@ components:
                                     isPaymentRelated:
                                       allOf:
                                         - type: boolean
-                                        - $ref: "#/components/schemas/positiveAmountType"
                                     paymentMethod:
                                       description: "How the payment was made (e.g. bank transfer)."
                                       allOf:
