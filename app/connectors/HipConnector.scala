@@ -68,6 +68,8 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
           }
         case response if response.status == 404 =>
           Future.failed(No_Data_Found_Error)
+        case response if response.status == 503 =>
+          Future.failed(Service_Currently_Unavailable_Error)
         case response =>
           logger.warn(s"call to HIP failed with response ${response.status}")
           Future.failed(Downstream_Error)

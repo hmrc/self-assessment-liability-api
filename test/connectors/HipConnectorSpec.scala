@@ -100,7 +100,7 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
     "return expected error if 503 response is received" in {
       simulateGet(serviceUrl, SERVICE_UNAVAILABLE, "")
       val result = connector.getSelfAssessmentData(utr, date, date)
-      result.failed.futureValue mustBe Downstream_Error
+      result.failed.futureValue mustBe Service_Currently_Unavailable_Error
     }
 
     "return Downstream_Error in case of any other response" in {
