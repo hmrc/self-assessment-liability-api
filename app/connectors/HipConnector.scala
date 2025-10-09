@@ -20,7 +20,6 @@ import com.google.common.base.Charsets
 import config.AppConfig
 import models.HipResponse
 import models.ServiceErrors.*
-
 import java.util.Base64
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess}

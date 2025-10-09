@@ -16,20 +16,20 @@
 
 package controllers
 
-import models.{ApiErrorResponses, CidPerson, MtdId, TaxIds}
+import models.*
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, contentAsJson, defaultAwaitTimeout, route, status}
+import play.api.test.Helpers.{GET, contentAsJson, route, status}
 import shared.HipResponseGenerator
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
-import utils.IntegrationSpecBase
-import uk.gov.hmrc.http.HttpReads.Implicits.*
 import utils.constants.ErrorMessageConstansts.*
-
+import utils.{IntegrationSpecBase, TaxYearFormatter}
+import play.api.test.Helpers.defaultAwaitTimeout
 import java.net.URI
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -60,7 +60,9 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
       "return 200 with the correct response in success journey" in {
 
         forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
-          val hipResponsePayload = Json.toJson(hipResponse)
+          println(s"generator tax years ${hipResponse.chargeDetails.map(_.taxYear).mkString(" , ")}")
+          val formattedResponse = TaxYearFormatter.formatter(hipResponse)
+          val hipResponsePayload = Json.toJson(formattedResponse)
           simulateGet(cidUrl, OK, cidPayload)
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
           simulateGet(hipUrl, OK, hipResponsePayload.toString)
