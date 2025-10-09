@@ -25,7 +25,7 @@ case class CodedOutDetail(
     effectiveStartDate: LocalDate,
     effectiveEndDate: LocalDate
 ) {
-  require(totalAmount > 0)
+  require(totalAmount >= 0)
 }
 
 object CodedOutDetail {
