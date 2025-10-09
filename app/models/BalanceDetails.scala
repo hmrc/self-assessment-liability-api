@@ -31,11 +31,11 @@ case class BalanceDetails(
     codedOutDetail: List[CodedOutDetail]
 ) {
   require(
-    totalOverdueBalance > 0 &&
-      totalPayableBalance > 0 &&
-      totalPendingBalance > 0 &&
-      totalCreditAvailable > 0 &&
-      totalBalance > 0
+    totalOverdueBalance >= 0 &&
+      totalPayableBalance >= 0 &&
+      totalPendingBalance >= 0 &&
+      totalCreditAvailable >= 0 &&
+      totalBalance >= 0
   )
 }
 
