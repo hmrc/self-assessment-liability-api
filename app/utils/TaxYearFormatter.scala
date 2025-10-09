@@ -19,16 +19,17 @@ package utils
 import models.HipResponse
 import play.api.Logging
 
-object TaxYearFormatter extends Logging{
-
+object TaxYearFormatter extends Logging {
 
   def formatter(hipResponse: HipResponse): HipResponse = {
-      val chargesWithReformattedTaxYear = hipResponse.chargeDetails.map { charge =>
-        val newYearFormat = s"${charge.taxYear.toInt}-${charge.taxYear.toInt + 1}"
-        charge.copy(taxYear = newYearFormat)
-      }
-      hipResponse.copy(chargeDetails = chargesWithReformattedTaxYear)
+    val chargesWithReformattedTaxYear = hipResponse.chargeDetails.map { charge =>
+      logger.info(
+        s"generator tax years ${hipResponse.chargeDetails.map(_.taxYear).mkString(" , ")}"
+      )
+      val newYearFormat = s"${charge.taxYear.toInt}-${charge.taxYear.toInt + 1}"
+      charge.copy(taxYear = newYearFormat)
     }
-
+    hipResponse.copy(chargeDetails = chargesWithReformattedTaxYear)
+  }
 
 }

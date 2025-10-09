@@ -20,16 +20,13 @@ import models.*
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, contentAsJson, route, status}
 import shared.HipResponseGenerator
-import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.constants.ErrorMessageConstansts.*
 import utils.{IntegrationSpecBase, TaxYearFormatter}
-import play.api.test.Helpers.defaultAwaitTimeout
 import java.net.URI
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -60,19 +57,16 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
       "return 200 with the correct response in success journey" in {
 
         forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
-          println(s"generator tax years ${hipResponse.chargeDetails.map(_.taxYear).mkString(" , ")}")
           val formattedResponse = TaxYearFormatter.formatter(hipResponse)
           val hipResponsePayload = Json.toJson(formattedResponse)
           simulateGet(cidUrl, OK, cidPayload)
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
           simulateGet(hipUrl, OK, hipResponsePayload.toString)
-          val request = FakeRequest(GET, s"/$utr?fromDate=$dateFrom")
-            .withHeaders("Authorization" -> "Bearer 1234")
+          val request = client.get(URI.create(baseUrl).toURL).setHeader("Authorization" -> "Bearer 1234").execute[HttpResponse]
 
-          val result = route(app, request).get
-
-          status(result) mustEqual OK
-          contentAsJson(result) mustEqual hipResponsePayload
+          val result = Await.result(request, 5.seconds)
+          result.status mustEqual OK
+          result.body mustEqual  hipResponsePayload.toString
         }
       }
       "return 500 if call fails due to data quality issues" in {

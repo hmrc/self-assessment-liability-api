@@ -31,7 +31,8 @@ class SelfAssessmentService @Inject() (
     cidConnector: CitizenDetailsConnector,
     mtdConnector: MtdIdentifierLookupConnector,
     hipConnector: HipConnector
-)(implicit ec: ExecutionContext) extends Logging{
+)(implicit ec: ExecutionContext)
+    extends Logging {
   def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
       maybeNino <- cidConnector.getNino(utr)
@@ -49,10 +50,9 @@ class SelfAssessmentService @Inject() (
         dateTo
       )
       hipResponseWithFormattedTaxYears = TaxYearFormatter.formatter(hipResponse)
-    } yield hipResponseWithFormattedTaxYears).recoverWith{
-      case _: NumberFormatException =>
-        logger.warn(s"At least one tax year received does not follow YYYY format")
-        Future.failed(Json_Validation_Error)
+    } yield hipResponseWithFormattedTaxYears).recoverWith { case _: NumberFormatException =>
+      logger.warn(s"At least one tax year received does not follow YYYY format")
+      Future.failed(Json_Validation_Error)
     }
   }
 

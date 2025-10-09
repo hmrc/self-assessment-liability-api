@@ -22,7 +22,7 @@ import org.scalacheck.Gen
 import java.time.{LocalDate, ZoneId}
 
 object HipResponseGenerator {
-  
+
   val localDateGen: Gen[LocalDate] = for {
     year <- Gen.choose(LocalDate.now().minusYears(7).getYear, LocalDate.now().getYear)
     date <- Gen.calendar.map(c => LocalDate.ofInstant(c.toInstant, ZoneId.of("UTC")).withYear(year))
