@@ -26,7 +26,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import shared.{HipResponseGenerator, SpecBase}
-
+import utils.TaxYearFormatter
 import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
@@ -113,8 +113,9 @@ class SelfAssessmentServiceSpec extends SpecBase {
             meq(today)
           )(any(), any())
         ).thenReturn(Future.successful(hipResponse))
+        val formattedResponse = TaxYearFormatter.formatter(hipResponse)
         val result = service.viewAccountService("utr", today.minusYears(2), today)
-        result.futureValue shouldBe hipResponse
+        result.futureValue shouldBe formattedResponse
       }
     }
     "Enquire for self assessment data with start date provided until today's date" in {
@@ -127,8 +128,9 @@ class SelfAssessmentServiceSpec extends SpecBase {
             meq(today)
           )(any(), any())
         ).thenReturn(Future.successful(hipResponse))
+        val formattedResponse = TaxYearFormatter.formatter(hipResponse)
         val result = service.viewAccountService("utr", today.minusYears(4), today)
-        result.futureValue shouldBe hipResponse
+        result.futureValue shouldBe formattedResponse
       }
     }
 
