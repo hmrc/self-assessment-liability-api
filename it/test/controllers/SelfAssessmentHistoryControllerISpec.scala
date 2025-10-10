@@ -57,16 +57,15 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
       "return 200 with the correct response in success journey" in {
 
         forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
-          val formattedResponse = TaxYearFormatter.formatter(hipResponse)
-          val hipResponsePayload = Json.toJson(formattedResponse)
+          val hipResponsePayload = Json.toJson(hipResponse)
           simulateGet(cidUrl, OK, cidPayload)
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
           simulateGet(hipUrl, OK, hipResponsePayload.toString)
           val request = client.get(URI.create(baseUrl).toURL).setHeader("Authorization" -> "Bearer 1234").execute[HttpResponse]
-
+          val formattedResponse = Json.toJson(TaxYearFormatter.formatter(hipResponse))
           val result = Await.result(request, 5.seconds)
           result.status mustEqual OK
-          result.body mustEqual  hipResponsePayload.toString
+          result.body mustEqual  formattedResponse.toString
         }
       }
       "return 500 if call fails due to data quality issues" in {
