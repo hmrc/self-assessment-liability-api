@@ -39,6 +39,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
       fromDate: LocalDate,
       toDate: LocalDate
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HipResponse] = {
+    logger.info("calling ${appConfig.hipLookup}/as/self-assessment/account/$utr/liability-details")
     val encodedAuthToken = Base64.getEncoder.encodeToString(
       s"${appConfig.hipClientId}:${appConfig.hipClientSecret}".getBytes(Charsets.UTF_8)
     )
