@@ -38,7 +38,7 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
   private val utr: String = "1234567890"
   private val date: LocalDate = LocalDate.now()
   private val serviceUrl =
-    s"/self-assessment/account/$utr/liability-details?dateFrom=$date&dateTo=$date"
+    s"/as/self-assessment/account/$utr/liability-details?dateFrom=$date&dateTo=$date"
 
   "getSelfAssessmentData" should {
     "return JSON associated with the utr and date if 200 response is received" in {
