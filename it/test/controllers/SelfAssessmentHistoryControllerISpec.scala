@@ -23,11 +23,11 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{GET, contentAsJson, defaultAwaitTimeout, route, status}
 import shared.HipResponseGenerator
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.IntegrationSpecBase
-import uk.gov.hmrc.http.HttpReads.Implicits.*
 import utils.constants.ErrorMessageConstansts.*
 
 import java.net.URI

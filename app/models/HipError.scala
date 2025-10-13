@@ -16,14 +16,10 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class HipResponseError(
-    origin: String,
-    service: Option[String],
-    response: HipErrorDetails
-)
+case class HipError(`type`: String, reason: String)
 
-object HipResponseError {
-  implicit val format: OFormat[HipResponseError] = Json.format[HipResponseError]
+object HipError {
+  implicit val format: Format[HipError] = Json.format[HipError]
 }

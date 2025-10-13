@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.HipResponse
+import models.{HipError, HipErrorDetails, HipResponse, HipResponseError}
 import models.ServiceErrors.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.Application
@@ -39,7 +39,9 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
   private val date: LocalDate = LocalDate.now()
   private val serviceUrl =
     s"/self-assessment/account/$utr/liability-details?dateFrom=$date&dateTo=$date"
-
+  private val hipError = Json
+    .toJson(HipResponseError("hip", None, HipErrorDetails(List(HipError("badType", "badMessage")))))
+    .toString
   "getSelfAssessmentData" should {
     "return JSON associated with the utr and date if 200 response is received" in {
       forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
@@ -56,55 +58,55 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
     }
 
     "return expected error if 400 response is received" in {
-      simulateGet(serviceUrl, BAD_REQUEST, "")
+      simulateGet(serviceUrl, BAD_REQUEST, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 401 response is received" in {
-      simulateGet(serviceUrl, UNAUTHORIZED, "")
+      simulateGet(serviceUrl, UNAUTHORIZED, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 403 response is received" in {
-      simulateGet(serviceUrl, FORBIDDEN, "")
+      simulateGet(serviceUrl, FORBIDDEN, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 404 response is received" in {
-      simulateGet(serviceUrl, NOT_FOUND, "")
+      simulateGet(serviceUrl, NOT_FOUND, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe No_Data_Found_Error
     }
 
     "return expected error if 422 response is received" in {
-      simulateGet(serviceUrl, UNPROCESSABLE_ENTITY, "")
+      simulateGet(serviceUrl, UNPROCESSABLE_ENTITY, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 500 response is received" in {
-      simulateGet(serviceUrl, INTERNAL_SERVER_ERROR, "")
+      simulateGet(serviceUrl, INTERNAL_SERVER_ERROR, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 502 response is received" in {
-      simulateGet(serviceUrl, BAD_GATEWAY, "")
+      simulateGet(serviceUrl, BAD_GATEWAY, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
 
     "return expected error if 503 response is received" in {
-      simulateGet(serviceUrl, SERVICE_UNAVAILABLE, "")
+      simulateGet(serviceUrl, SERVICE_UNAVAILABLE, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Service_Currently_Unavailable_Error
     }
 
     "return Downstream_Error in case of any other response" in {
-      simulateGet(serviceUrl, IM_A_TEAPOT, "")
+      simulateGet(serviceUrl, IM_A_TEAPOT, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }

@@ -35,10 +35,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extends Logging {
   def getSelfAssessmentData(
-                             utr: String,
-                             fromDate: LocalDate,
-                             toDate: LocalDate
-                           )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HipResponse] = {
+      utr: String,
+      fromDate: LocalDate,
+      toDate: LocalDate
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HipResponse] = {
     val encodedAuthToken = Base64.getEncoder.encodeToString(
       s"${appConfig.hipClientId}:${appConfig.hipClientSecret}".getBytes(Charsets.UTF_8)
     )
@@ -55,15 +55,17 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
       .get(
         url"${appConfig.hipLookup}/self-assessment/account/$utr/liability-details"
       )
-      .transform(_.withQueryStringParameters(queryParameters *))
-      .setHeader(headers *)
+      .transform(_.withQueryStringParameters(queryParameters*))
+      .setHeader(headers*)
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 =>
           response.json.validate[HipResponse] match {
             case JsSuccess(hipResponse, _) => Future.successful(hipResponse)
             case JsError(error) =>
-              logger.warn(s"validation failed on success payload received from HIP with error: $error")
+              logger.warn(
+                s"validation failed on success payload received from HIP with error: $error"
+              )
               Future.failed(Json_Validation_Error)
           }
         case response if response.status == 404 =>
@@ -71,10 +73,14 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
         case response if response.status == 503 =>
           Future.failed(Service_Currently_Unavailable_Error)
         case response =>
-          response.json.validate[List[HipResponseError]] match {
+          response.json.validate[HipResponseError] match {
             case JsSuccess(hipErrorResponse, _) =>
-              val errorSummary = hipErrorResponse.map(e => s"${e.`type`}: ${e.reason}").mkString("; ")
-              logger.warn(s"call to HIP failed with status ${response.status}. Errors: $errorSummary")
+              val errorSummary = hipErrorResponse.response.failures
+                .map(e => s"${e.`type`}: ${e.reason}")
+                .mkString("; ")
+              logger.warn(
+                s"call to HIP failed with status ${response.status}. Errors: $errorSummary"
+              )
               Future.failed(Downstream_Error)
             case JsError(error) =>
               logger.warn(s"validation failed on the error received from HIP with error: $error")
