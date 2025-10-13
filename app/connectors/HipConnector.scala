@@ -18,7 +18,7 @@ package connectors
 
 import com.google.common.base.Charsets
 import config.AppConfig
-import models.HipResponse
+import models.{HipResponse, HipResponseError}
 import models.ServiceErrors.*
 import java.util.Base64
 import play.api.Logging
@@ -49,7 +49,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
     val headers = Seq(
       "Authorization" -> s"Basic $encodedAuthToken",
       "Content-Type" -> "application/json",
-      "correlationId" -> UUID.randomUUID.toString
+      "CorrelationId" -> UUID.randomUUID.toString
     )
     client
       .get(
@@ -63,7 +63,9 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
           response.json.validate[HipResponse] match {
             case JsSuccess(hipResponse, _) => Future.successful(hipResponse)
             case JsError(error) =>
-              logger.warn(s"validation failed on the payload received from HIP with error: $error")
+              logger.warn(
+                s"validation failed on success payload received from HIP with error: $error"
+              )
               Future.failed(Json_Validation_Error)
           }
         case response if response.status == 404 =>
@@ -71,8 +73,19 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
         case response if response.status == 503 =>
           Future.failed(Service_Currently_Unavailable_Error)
         case response =>
-          logger.warn(s"call to HIP failed with response ${response.status}")
-          Future.failed(Downstream_Error)
+          response.json.validate[HipResponseError] match {
+            case JsSuccess(hipErrorResponse, _) =>
+              val errorSummary = hipErrorResponse.response.failures
+                .map(e => s"${e.`type`}: ${e.reason}")
+                .mkString("; ")
+              logger.warn(
+                s"call to HIP failed with status ${response.status}. Errors: $errorSummary"
+              )
+              Future.failed(Downstream_Error)
+            case JsError(error) =>
+              logger.warn(s"validation failed on the error received from HIP with error: $error")
+              Future.failed(Json_Validation_Error)
+          }
       }
   }
 }

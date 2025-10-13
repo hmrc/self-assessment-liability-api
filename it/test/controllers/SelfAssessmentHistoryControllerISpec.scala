@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
+import utils.IntegrationSpecBase
 import utils.constants.ErrorMessageConstansts.*
 import utils.{IntegrationSpecBase, TaxYearFormatter}
 import java.net.URI
