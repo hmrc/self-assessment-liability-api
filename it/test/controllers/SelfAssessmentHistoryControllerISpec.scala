@@ -16,12 +16,10 @@
 
 package controllers
 
-import models.{ApiErrorResponses, CidPerson, MtdId, TaxIds}
+import models.*
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, contentAsJson, defaultAwaitTimeout, route, status}
 import shared.HipResponseGenerator
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
@@ -29,7 +27,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.IntegrationSpecBase
 import utils.constants.ErrorMessageConstansts.*
-
+import utils.{IntegrationSpecBase, TaxYearFormatter}
 import java.net.URI
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -64,13 +62,11 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
           simulateGet(cidUrl, OK, cidPayload)
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
           simulateGet(hipUrl, OK, hipResponsePayload.toString)
-          val request = FakeRequest(GET, s"/$utr?fromDate=$dateFrom")
-            .withHeaders("Authorization" -> "Bearer 1234")
-
-          val result = route(app, request).get
-
-          status(result) mustEqual OK
-          contentAsJson(result) mustEqual hipResponsePayload
+          val request = client.get(URI.create(baseUrl).toURL).setHeader("Authorization" -> "Bearer 1234").execute[HttpResponse]
+          val formattedResponse = Json.toJson(TaxYearFormatter.formatter(hipResponse))
+          val result = Await.result(request, 5.seconds)
+          result.status mustEqual OK
+          result.body mustEqual  formattedResponse.toString
         }
       }
       "return 500 if call fails due to data quality issues" in {

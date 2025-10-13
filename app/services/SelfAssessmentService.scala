@@ -18,8 +18,10 @@ package services
 
 import connectors.{CitizenDetailsConnector, HipConnector, MtdIdentifierLookupConnector}
 import models.HipResponse
-import models.ServiceErrors.Downstream_Error
+import models.ServiceErrors.{Downstream_Error, Json_Validation_Error}
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.TaxYearFormatter
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -29,7 +31,8 @@ class SelfAssessmentService @Inject() (
     cidConnector: CitizenDetailsConnector,
     mtdConnector: MtdIdentifierLookupConnector,
     hipConnector: HipConnector
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends Logging {
   def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
       maybeNino <- cidConnector.getNino(utr)
@@ -40,13 +43,17 @@ class SelfAssessmentService @Inject() (
   def viewAccountService(utr: String, dateFrom: LocalDate, dateTo: LocalDate)(implicit
       hc: HeaderCarrier
   ): Future[HipResponse] = {
-    for {
+    (for {
       hipResponse <- hipConnector.getSelfAssessmentData(
         utr,
         dateFrom,
         dateTo
       )
-    } yield hipResponse
+      hipResponseWithFormattedTaxYears = TaxYearFormatter.formatter(hipResponse)
+    } yield hipResponseWithFormattedTaxYears).recoverWith { case _: NumberFormatException =>
+      logger.warn(s"At least one tax year received does not follow YYYY format")
+      Future.failed(Json_Validation_Error)
+    }
   }
 
 }
