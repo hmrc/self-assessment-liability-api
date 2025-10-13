@@ -40,7 +40,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
         case response if response.status == 500 => Future.failed(Downstream_Error)
         case response if response.status == 400 => Future.failed(Downstream_Error)
         case response =>
-          logger.warn(s"no NINO found for call to ${appConfig.mtdIdLookup}/mtd-identifier-lookup/ ")
+          logger.warn(s"${response.status} received on call to ${appConfig.mtdIdLookup}/mtd-identifier-lookup/ with body ${response.body} ")
           Future.failed(Service_Currently_Unavailable_Error)
       }
       .recoverWith { case _: JsResultException =>
