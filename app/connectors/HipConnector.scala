@@ -49,7 +49,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
     val headers = Seq(
       "Authorization" -> s"Basic $encodedAuthToken",
       "Content-Type" -> "application/json",
-      "correlationId" -> UUID.randomUUID.toString
+      "CorrelationId" -> UUID.randomUUID.toString
     )
     client
       .get(
