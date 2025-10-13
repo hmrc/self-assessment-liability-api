@@ -18,7 +18,7 @@ package connectors
 
 import com.google.common.base.Charsets
 import config.AppConfig
-import models.HipResponse
+import models.{HipResponse, HipResponseError}
 import models.ServiceErrors.*
 
 import java.util.Base64
@@ -71,8 +71,12 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
         case response if response.status == 503 =>
           Future.failed(Service_Currently_Unavailable_Error)
         case response =>
-          logger.warn(s"call to HIP failed with response ${response.status}")
+          response.json.validate[HipResponseError] match {
+          case JsSuccess(hipResponse, _) =>
+          logger.warn(s"call to HIP failed with response ${response.status} and message ${response.body}")
           Future.failed(Downstream_Error)
+          }
+
       }
   }
 }
