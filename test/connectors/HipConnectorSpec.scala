@@ -38,10 +38,11 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
   private val utr: String = "1234567890"
   private val date: LocalDate = LocalDate.now()
   private val serviceUrl =
-    s"/self-assessment/account/$utr/liability-details?dateFrom=$date&dateTo=$date"
+    s"/as/self-assessment/account/$utr/liability-details?dateFrom=$date&dateTo=$date"
   private val hipError = Json
     .toJson(HipResponseError("hip", None, HipErrorDetails(List(HipError("badType", "badMessage")))))
     .toString
+
   "getSelfAssessmentData" should {
     "return JSON associated with the utr and date if 200 response is received" in {
       forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>

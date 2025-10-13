@@ -51,7 +51,7 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
   val mtdId = MtdId("mtdId")
   val mtdIdPayload: String = Json.obj("mtdbsa" -> "mtdId").toString
   val baseUrl = s"http://localhost:$port/$utr?fromDate=$dateFrom"
-  val hipUrl = s"/self-assessment/account/$utr/liability-details?dateFrom=$dateFrom&dateTo=$dateTo"
+  val hipUrl = s"/as/self-assessment/account/$utr/liability-details?dateFrom=$dateFrom&dateTo=$dateTo"
   val cidUrl = s"/citizen-details/sautr/$utr"
   val mtdLookupUrl = s"/mtd-identifier-lookup/nino/$nino"
 
