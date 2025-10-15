@@ -50,10 +50,8 @@ class GlobalErrorHandler extends HttpErrorHandler with Logging {
       case No_Data_Found_Error => NotFound(ApiErrorResponses(NOT_FOUND_RESPONSE).asJson).toFuture
       case Invalid_Start_Date_Error | Invalid_Utr_Error | _: NoActiveSession =>
         BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson).toFuture
-      case Unauthorised_Error =>
+      case Unauthorised_Error | _: AuthorisationException =>
         Unauthorized(ApiErrorResponses(UNAUTHORISED_RESPONSE).asJson).toFuture
-      case Forbidden_Error | _: AuthorisationException =>
-        Forbidden(ApiErrorResponses(FORBIDDEN_RESPONSE).asJson).toFuture
       case _ => ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson).toFuture
     }
   }

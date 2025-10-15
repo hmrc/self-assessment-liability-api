@@ -28,5 +28,4 @@ object ServiceErrors {
   case object Invalid_Start_Date_Error extends ServiceErrors
   case object Invalid_Utr_Error extends ServiceErrors
   case object Unauthorised_Error extends ServiceErrors
-  case object Forbidden_Error extends ServiceErrors
 }
