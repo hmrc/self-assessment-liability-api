@@ -38,7 +38,8 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
       fromDate: LocalDate,
       toDate: LocalDate
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HipResponse] = {
-    logger.info("calling ${appConfig.hipLookup}/as/self-assessment/account/$utr/liability-details")
+    val correlationId = UUID.randomUUID.toString
+    logger.info(s"calling HIP with correlation Id: $correlationId")
     val encodedAuthToken = Base64.getEncoder.encodeToString(
       s"${appConfig.hipClientId}:${appConfig.hipClientSecret}".getBytes(Charsets.UTF_8)
     )
@@ -49,7 +50,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
     val headers = Seq(
       "Authorization" -> s"Basic $encodedAuthToken",
       "Content-Type" -> "application/json",
-      "CorrelationId" -> UUID.randomUUID.toString
+      "CorrelationId" -> correlationId
     )
     client
       .get(
