@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.{HipError, HipErrorDetails, HipResponse, HipResponseError}
+import models.{BalanceDetails, HipError, HipErrorDetails, HipResponse, HipResponseError}
 import models.ServiceErrors.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.Application
