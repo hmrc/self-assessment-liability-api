@@ -35,7 +35,9 @@ case class BalanceDetails(
       totalPayableBalance >= 0 &&
       totalPendingBalance >= 0 &&
       totalCreditAvailable >= 0 &&
-      totalBalance >= 0
+      totalBalance >= 0 &&
+      (totalPayableBalance == 0 || earliestPayableDueDate.isDefined) &&
+      (totalPendingBalance == 0 || earliestPendingDueDate.isDefined)
   )
 }
 
