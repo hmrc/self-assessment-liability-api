@@ -57,7 +57,7 @@ More detail can be found in the [service guide error responses](https://develope
       "chargeType": "ITSA",
       "chargeAmount": 1250,
       "outstandingAmount": 500,
-      "taxYear": 2024,
+      "taxYear": "2024-2025",
       "dueDate": "2025-04-30",
       "amendments": [
         {
@@ -76,7 +76,7 @@ More detail can be found in the [service guide error responses](https://develope
       "chargeType": "NICS",
       "chargeAmount": 2200,
       "outstandingAmount": 0,
-      "taxYear": 2023,
+      "taxYear": "2023-2024",
       "dueDate": "2024-04-01",
       "outstandingInterestDue": 20,
       "accruingInterestPeriod": {
@@ -101,7 +101,7 @@ More detail can be found in the [service guide error responses](https://develope
       "chargeType": "VATC",
       "chargeAmount": 1500,
       "outstandingAmount": 1500,
-      "taxYear": 2025,
+      "taxYear": "2025-2026",
       "dueDate": "2025-07-15"
     }
   ],
