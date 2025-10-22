@@ -141,22 +141,13 @@ class GlobalErrorHandlerSpec extends AnyWordSpec with Matchers with MockitoSugar
         contentAsJson(result) shouldBe expectedJson
       }
 
-      "return Forbidden for Forbidden_Error" in {
-        val result: Future[Result] = errorHandler.onServerError(fakeRequest, Forbidden_Error)
-
-        status(result) shouldBe FORBIDDEN
-
-        val expectedJson = ApiErrorResponses(FORBIDDEN_RESPONSE).asJson
-        contentAsJson(result) shouldBe expectedJson
-      }
-
       "return Forbidden for AuthorisationException" in {
         val authException = AuthorisationException.fromString("UnsupportedAffinityGroup")
         val result: Future[Result] = errorHandler.onServerError(fakeRequest, authException)
 
-        status(result) shouldBe FORBIDDEN
+        status(result) shouldBe UNAUTHORIZED
 
-        val expectedJson = ApiErrorResponses(FORBIDDEN_RESPONSE).asJson
+        val expectedJson = ApiErrorResponses(UNAUTHORISED_RESPONSE).asJson
         contentAsJson(result) shouldBe expectedJson
       }
 
