@@ -46,6 +46,8 @@ class GlobalErrorHandler extends HttpErrorHandler with Logging {
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     exception match {
       case Downstream_Error | Json_Validation_Error | _: IllegalArgumentException =>
+        val message = exception.getMessage
+        logger.error(s"Unexpected data received from upstream service: $message")
         InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson).toFuture
       case No_Data_Found_Error => NotFound(ApiErrorResponses(NOT_FOUND_RESPONSE).asJson).toFuture
       case Invalid_Start_Date_Error | Invalid_Utr_Error | _: NoActiveSession =>

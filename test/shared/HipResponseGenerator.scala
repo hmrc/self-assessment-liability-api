@@ -42,9 +42,11 @@ object HipResponseGenerator {
   val balanceDetailsGen: Gen[BalanceDetails] = for {
     totalOverdueBalance <- Gen.choose(0.0, 50000.0).map(BigDecimal(_))
     totalPayableBalance <- Gen.choose(0.0, 100000.0).map(BigDecimal(_))
-    earliestPayableDueDate <- Gen.option(localDateGen)
+    earliestPayableDueDate <-
+      if (totalPayableBalance > 0) Gen.some(localDateGen) else Gen.const(None)
     totalPendingBalance <- Gen.choose(0.0, 25000.0).map(BigDecimal(_))
-    earliestPendingDueDate <- Gen.option(localDateGen)
+    earliestPendingDueDate <-
+      if (totalPendingBalance > 0) Gen.some(localDateGen) else Gen.const(None)
     totalBalance <- Gen.choose(0.0, 150000.0).map(BigDecimal(_))
     totalCreditAvailable <- Gen.choose(0.0, 20000.0).map(BigDecimal(_))
     codedOutDetails <- Gen.containerOf[List, CodedOutDetail](codedOutDetailGen)
