@@ -151,11 +151,11 @@ class SelfAssessmentServiceSpec extends SpecBase {
 
     "throw Json_Validation_Error if a taxYear in any format else than YYYY is received from HIP" in {
       val today = LocalDate.now()
-      HipResponseGenerator.hipResponseGen.map{hipResponse =>
-        val transformedHipResponse = hipResponse.copy(chargeDetails= hipResponse.chargeDetails.map{charge=>
-          charge.copy(taxYear = charge.taxYear + "----")
-          }
-        )
+      HipResponseGenerator.hipResponseGen.map { hipResponse =>
+        val transformedHipResponse =
+          hipResponse.copy(chargeDetails = hipResponse.chargeDetails.map { charge =>
+            charge.copy(taxYear = charge.taxYear + "----")
+          })
         when(
           mockHipConnector.getSelfAssessmentData(
             meq("utr"),
