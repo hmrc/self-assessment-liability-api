@@ -16,8 +16,8 @@
 
 package connectors
 
-import models.{BalanceDetails, HipError, HipErrorDetails, HipResponse, HipResponseError}
 import models.ServiceErrors.*
+import models.{HipError, HipErrorDetails, HipResponse, HipResponseError}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
