@@ -69,7 +69,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
               )
               Future.failed(Json_Validation_Error)
           }
-        case response if response.status == 404 || response.status == 422 =>
+        case response if response.status == 422 =>
           Future.failed(No_Data_Found_Error)
         case response if response.status == 503 =>
           Future.failed(Service_Currently_Unavailable_Error)
