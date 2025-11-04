@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.IntegrationSpecBase
 import utils.constants.ErrorMessageConstansts.*
-import utils.{IntegrationSpecBase, TaxYearFormatter}
+import utils.TaxYearFormatter
 import java.net.URI
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -198,7 +198,7 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
         "respond with a 404 if no data is found" in {
           simulateGet(cidUrl, OK, cidPayload)
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
-          simulateGet(hipUrl, NOT_FOUND, Json.obj().toString)
+          simulateGet(hipUrl, UNPROCESSABLE_ENTITY, Json.obj().toString)
           val result =
             Await.result(
               client

@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.{BalanceDetails, HipError, HipErrorDetails, HipResponse, HipResponseError}
+import models.{HipError, HipErrorDetails, HipResponse, HipResponseError}
 import models.ServiceErrors.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.Application
@@ -76,16 +76,10 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
       result.failed.futureValue mustBe Downstream_Error
     }
 
-    "return expected error if 404 response is received" in {
-      simulateGet(serviceUrl, NOT_FOUND, hipError)
-      val result = connector.getSelfAssessmentData(utr, date, date)
-      result.failed.futureValue mustBe No_Data_Found_Error
-    }
-
     "return expected error if 422 response is received" in {
       simulateGet(serviceUrl, UNPROCESSABLE_ENTITY, hipError)
       val result = connector.getSelfAssessmentData(utr, date, date)
-      result.failed.futureValue mustBe Downstream_Error
+      result.failed.futureValue mustBe No_Data_Found_Error
     }
 
     "return expected error if 500 response is received" in {
