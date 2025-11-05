@@ -25,7 +25,10 @@ case class CodedOutDetail(
     effectiveStartDate: LocalDate,
     effectiveEndDate: LocalDate
 ) {
-  require(totalAmount >= 0)
+  require(
+    totalAmount >= 0,
+    s"totalAmount must be >= 0 but was $totalAmount"
+  )
 }
 
 object CodedOutDetail {
