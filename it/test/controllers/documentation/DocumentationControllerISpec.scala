@@ -29,7 +29,7 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
 
   lazy val provider: HttpClientV2Provider = app.injector.instanceOf[HttpClientV2Provider]
   lazy val client: HttpClientV2 = provider.get()
-  
+
 
   val baseUrl = s"http://localhost:$port/api/definition"
 

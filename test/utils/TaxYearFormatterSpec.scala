@@ -25,9 +25,9 @@ class TaxYearFormatterSpec extends SpecBase {
 
   val balanceDetails = BalanceDetails(
     totalOverdueBalance = 100,
-    totalPayableBalance = 100,
+    totalPayableBalance = 0,
     earliestPayableDueDate = None,
-    totalPendingBalance = 100,
+    totalPendingBalance = 0,
     earliestPendingDueDate = None,
     totalBalance = 100,
     totalCreditAvailable = 100,
