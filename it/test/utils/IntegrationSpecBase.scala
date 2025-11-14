@@ -54,17 +54,19 @@ trait IntegrationSpecBase
     super.beforeEach()
   }
 
-  override lazy val app: Application = new GuiceApplicationBuilder()
+  override lazy val app: Application =
+    server.start()
+    new GuiceApplicationBuilder()
     .overrides(
       inject.bind[AuthConnector].toInstance(mockAuthConnector),
   )
     .configure(
    "play.http.errorHandler" -> "controllers.GlobalErrorHandler",
-  "microservice.services.citizen-details.port" -> wiremockPort,
-  "microservice.services.mtd-id-lookup.port" -> wiremockPort,
-  "microservice.services.hip.port" -> wiremockPort,
-  "auditing.enabled" -> false,
-  "metrics.enabled" -> false
+   "microservice.services.citizen-details.port" ->server.port(),
+   "microservice.services.mtd-id-lookup.port" -> server.port(),
+   "microservice.services.hip.port" -> server.port(),
+   "auditing.enabled" -> false,
+   "metrics.enabled" -> false
     )
     .build()
 }

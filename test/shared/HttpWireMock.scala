@@ -25,10 +25,8 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 trait HttpWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {
   this: SpecBase =>
 
-  val wiremockPort: Int = 12345
-
   protected val server: WireMockServer = new WireMockServer(
-    wireMockConfig.port(wiremockPort)
+    wireMockConfig.dynamicPort()
   )
 
   override def beforeAll(): Unit = {
