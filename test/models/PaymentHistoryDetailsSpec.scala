@@ -44,7 +44,7 @@ class PaymentHistoryDetailsSpec extends AnyWordSpec with Matchers {
       }
 
       exception shouldBe a[IllegalArgumentException]
-      exception.getMessage should include(s"paymentAmount must be >= 0 but was -50")
+      exception.getMessage should include("paymentAmount must be >= 0 but was -50")
     }
   }
 }

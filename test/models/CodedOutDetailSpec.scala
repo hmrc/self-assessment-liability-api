@@ -40,7 +40,7 @@ class CodedOutDetailSpec extends AnyWordSpec with Matchers {
       }
 
       exception shouldBe a[IllegalArgumentException]
-      exception.getMessage should include(s"totalAmount must be >= 0 but was -200")
+      exception.getMessage should include("totalAmount must be >= 0 but was -200")
     }
   }
 }
