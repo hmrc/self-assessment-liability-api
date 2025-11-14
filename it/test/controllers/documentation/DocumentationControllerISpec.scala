@@ -17,6 +17,7 @@
 package controllers.documentation
 
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
