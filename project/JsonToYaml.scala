@@ -47,8 +47,12 @@ object JsonToYaml {
 
       val pathsJson = (parsedJson \ "paths").as[JsObject]
       val processedPaths = JsObject(
-        pathsJson.fields.map { case (path, value) =>
-          s"$apiContext$path" -> value
+        pathsJson.fields.map { case (path, pathValue) =>
+          val updatedPathValue = pathValue.as[JsObject].fields.map { case (method, methodValue) =>
+            val updatedMethodValue = methodValue.as[JsObject] - "operationId"
+            method -> updatedMethodValue
+          }
+          s"$apiContext$path" -> JsObject(updatedPathValue)
         }
       )
 

@@ -6,7 +6,6 @@ tags: []
 paths:
   /individuals/self-assessment/breakdown/{utr}:
     get:
-      operationId: getYourSelfAssessmentData
       tags:
       - Self Assessment Account Details
       parameters:
