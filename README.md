@@ -164,7 +164,7 @@ This API interacts with internal HMRC services to fetch relevant data. For testi
 ## Testing
 Use the following command to run both unit and integration tests
 ```shell
-sbt 'testAll'
+sbt testAll
 ```
 
 ### API testing
@@ -191,6 +191,24 @@ Note: ensure that `sbt clean` and `sbt compile` commands are executed before `sb
 
 Requests can now be sent to this API, with responses matching any changes in the local code.
 
+## Generation, Validation and Publishing
+To ensure API documentation alignment with code, we generate the OpenAPI specification (OAS) directly from the route definitions using an SBT task, reducing risk and manual effort.
+
+
+To generate, validate and publish the YAML OAS, run:
+```shell
+sbt genValOas
+```
+The generated OAS will include definitions based on the application's routes. The output folder is set to 'resources/public/api/conf/1.0' so that the recent changes get deployed to the API platform.
+
+
+
+## All in one sbt alias:
+
+To run all tests, generate OAS and validate the OAS, you can run:
+```shell
+sbt testGenVal
+```
 ## License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
