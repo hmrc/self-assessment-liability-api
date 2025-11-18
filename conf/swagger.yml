@@ -489,23 +489,23 @@ components:
         balanceDetails:
           totalOverdueBalance: 500
           totalPayableBalance: 500
-          earliestPayableDueDate: 2025-04-30
+          earliestPayableDueDate: '2025-04-30'
           totalPendingBalance: 1500
           earliestPendingDueDate: '2025-07-15'
           totalBalance: 2000
           totalCreditAvailable: 0
           codedOutDetail:
             - totalAmount: 200
-              effectiveStartDate: 2023-04-06
-              effectiveEndDate: 2024-04-01
+              effectiveStartDate: '2023-04-06'
+              effectiveEndDate: '2024-04-01'
         chargeDetails:
           - chargeId: AB1234567
             creationDate: '2025-01-15'
             chargeType: ITSA
             chargeAmount: 1250
             outstandingAmount: 500
-            taxYear: 2024-2025
-            dueDate: 2025-04-30
+            taxYear: '2024-2025'
+            dueDate: '2025-04-30'
             amendments:
               - amendmentDate: '2025-04-15'
                 amendmentAmount: 500
@@ -518,7 +518,7 @@ components:
             chargeType: NICS
             chargeAmount: 2200
             outstandingAmount: 0
-            taxYear: 2023-2024
+            taxYear: '2023-2024'
             dueDate: '2024-04-01'
             outstandingInterestDue: 20.00
             accruingInterestPeriod:
@@ -537,7 +537,7 @@ components:
             chargeType: VATC
             chargeAmount: 1500
             outstandingAmount: 1500
-            taxYear: 2025-2026
+            taxYear: '2025-2026'
             dueDate: '2025-07-15'
         refundDetails:
           - refundDate: '2024-01-10'

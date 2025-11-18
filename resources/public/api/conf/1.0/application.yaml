@@ -484,15 +484,15 @@ components:
         balanceDetails:
           totalOverdueBalance: 500
           totalPayableBalance: 500
-          earliestPayableDueDate: 1745971200000
+          earliestPayableDueDate: 2025-04-30
           totalPendingBalance: 1500
           earliestPendingDueDate: 2025-07-15
           totalBalance: 2000
           totalCreditAvailable: 0
           codedOutDetail:
           - totalAmount: 200
-            effectiveStartDate: 1680739200000
-            effectiveEndDate: 1711929600000
+            effectiveStartDate: 2023-04-06
+            effectiveEndDate: 2024-04-01
         chargeDetails:
         - chargeId: AB1234567
           creationDate: 2025-01-15
@@ -500,7 +500,7 @@ components:
           chargeAmount: 1250
           outstandingAmount: 500
           taxYear: 2024-2025
-          dueDate: 1745971200000
+          dueDate: 2025-04-30
           amendments:
           - amendmentDate: 2025-04-15
             amendmentAmount: 500
