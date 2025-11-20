@@ -46,7 +46,10 @@ case class BalanceDetails(
     totalCreditAvailable >= 0,
     s"totalCreditAvailable must be >= 0 but was $totalCreditAvailable"
   )
-  require(totalBalance >= 0, s"totalBalance must be >= 0 but was $totalBalance")
+  require(
+    totalBalance >= 0,
+    s"totalBalance must be >= 0 but was $totalBalance"
+  )
   require(
     totalPayableBalance == 0 || earliestPayableDueDate.isDefined,
     s"earliestPayableDueDate must be defined when totalPayableBalance > 0 (was $totalPayableBalance, earliestPayableDueDate=$earliestPayableDueDate)"

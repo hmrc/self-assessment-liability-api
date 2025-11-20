@@ -34,7 +34,14 @@ case class ChargeDetails(
     accruingInterestRate: Option[BigDecimal],
     amendments: List[Amendment]
 ) {
-  require(chargeAmount >= 0 && outstandingAmount >= 0)
+  require(
+    chargeAmount >= 0,
+    s"chargeAmount must be >= 0 but was $chargeAmount"
+  )
+  require(
+    outstandingAmount >= 0,
+    s"outstandingAmount must be >= 0 but was $outstandingAmount"
+  )
 }
 
 object ChargeDetails {

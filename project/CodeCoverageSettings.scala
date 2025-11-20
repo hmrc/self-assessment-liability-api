@@ -7,7 +7,23 @@ object CodeCoverageSettings {
     "<empty>",
     "Reverse.*",
     ".*Routes.*",
-    "models.*"
+    "config.*",
+    "testOnly.*",
+    "testOnlyDoNotUseInAppConf.*",
+    "models.AccruingInterestPeriod",
+    "models.Amendment",
+    "models.ApiErrorResponses",
+    "models.CitizenDetailsResponse",
+    "models.ApiErrorResponses",
+    "models.HipError",
+    "models.HipErrorDetails",
+    "models.HipResponse",
+    "models.HipResponseError",
+    "models.MtdId",
+    "models.ApiErrorResponses",
+    "models.RequestPeriod",
+    "models.RequestWithUtr",
+    "models.ServiceErrors"
   )
 
   val settings: Seq[Setting[_]] = Seq(

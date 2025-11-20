@@ -28,7 +28,10 @@ case class PaymentHistoryDetails(
     processedDate: Option[LocalDate],
     allocationReference: List[String]
 ) {
-  require(paymentAmount >= 0)
+  require(
+    paymentAmount >= 0,
+    s"paymentAmount must be >= 0 but was $paymentAmount"
+  )
 }
 
 object PaymentHistoryDetails {

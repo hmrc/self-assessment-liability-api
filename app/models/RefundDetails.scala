@@ -30,7 +30,14 @@ case class RefundDetails(
     totalRefundAmount: BigDecimal,
     refundStatus: Option[String]
 ) {
-  require(refundRequestAmount >= 0 && totalRefundAmount >= 0)
+  require(
+    refundRequestAmount >= 0,
+    s"refundRequestAmount must be >= 0 but was $refundRequestAmount"
+  )
+  require(
+    totalRefundAmount >= 0,
+    s"totalRefundAmount must be >= 0 but was $totalRefundAmount"
+  )
 }
 
 object RefundDetails {
