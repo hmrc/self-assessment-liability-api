@@ -95,7 +95,7 @@ class AuthenticateRequestAction @Inject() (
         Future.successful(None)
       }.recoverWith { case _: AuthorisationException =>
         selfAssessmentService
-          .getMtdIdFromUtr(request.utr)
+          .getMtdIdFromUtr(request.utr, config.useStubsForAgentAuthorisation)
           .flatMap { mtdId =>
             authorised(delegatedMtdEnrolment(mtdId)) {
               Future.successful(None)

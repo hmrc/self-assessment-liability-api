@@ -30,10 +30,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class CitizenDetailsConnector @Inject() (client: HttpClientV2, appConfig: AppConfig)
     extends Logging {
   def getNino(
-      utr: String
+      utr: String,
+      stubAgentAuth: Boolean = false
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] = {
     client
-      .get(url"${appConfig.citizenDetailsLookup}/citizen-details/sautr/$utr")
+      .get(url"${appConfig.citizenDetailsLookup(stubAgentAuth)}/citizen-details/sautr/$utr")
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 =>

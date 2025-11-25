@@ -18,7 +18,6 @@ package controllers.documentation
 
 import config.AppConfig
 import controllers.Assets
-import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -31,14 +30,12 @@ class DocumentationController @Inject() (
     assets: Assets,
     cc: ControllerComponents,
     appConfig: AppConfig
-) extends BackendController(cc)
-    with Logging {
+) extends BackendController(cc) {
 
   def definition(): Action[AnyContent] = Action {
     val status = appConfig.apiPlatformStatus
     val enabled = appConfig.apiPlatformEndpointsEnabled
     val json = Json.parse(Source.fromResource("public/api/definition.json").mkString)
-    logger.info(s"API enablment is set to $enabled with $status status")
     val optimus = (__ \ "api" \ "versions").json.update(
       Reads
         .list(

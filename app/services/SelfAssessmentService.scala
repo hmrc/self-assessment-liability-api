@@ -33,9 +33,11 @@ class SelfAssessmentService @Inject() (
     hipConnector: HipConnector
 )(implicit ec: ExecutionContext)
     extends Logging {
-  def getMtdIdFromUtr(utr: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def getMtdIdFromUtr(utr: String, stubAgentAuth: Boolean = false)(implicit
+      hc: HeaderCarrier
+  ): Future[String] = {
     for {
-      maybeNino <- cidConnector.getNino(utr)
+      maybeNino <- cidConnector.getNino(utr, stubAgentAuth)
       mtdId <- maybeNino.map(mtdConnector.getMtdId(_)).getOrElse(Future.failed(Downstream_Error))
     } yield mtdId.mtdbsa
   }
