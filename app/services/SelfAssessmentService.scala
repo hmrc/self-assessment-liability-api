@@ -38,7 +38,9 @@ class SelfAssessmentService @Inject() (
   ): Future[String] = {
     for {
       maybeNino <- cidConnector.getNino(utr, stubAgentAuth)
-      mtdId <- maybeNino.map(mtdConnector.getMtdId(_)).getOrElse(Future.failed(Downstream_Error))
+      mtdId <- maybeNino
+        .map(mtdConnector.getMtdId(_, stubAgentAuth))
+        .getOrElse(Future.failed(Downstream_Error))
     } yield mtdId.mtdbsa
   }
 
