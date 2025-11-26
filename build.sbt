@@ -21,7 +21,7 @@ lazy val microservice = Project("self-assessment-liability-api", file("."))
   .settings(PlaySwagger.settings *)
   .settings(PlayKeys.playDefaultPort := 49094)
 addCommandAlias("testAll", "; test ; it/test")
-addCommandAlias("genValOas", "; routesToYamlOas ; validateOas")
+addCommandAlias("genValOas", "; clean ; routesToYamlOas ; validateOas")
 addCommandAlias("testGenVal", "; testAll ; routesToYamlOas ; validateOas")
 
 lazy val it = (project in file("it"))

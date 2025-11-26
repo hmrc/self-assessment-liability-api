@@ -150,10 +150,7 @@ More detail can be found in the [service guide error responses](https://develope
 
 ```json
 {
-  "failure": {
-    "type": "BAD_REQUEST",
-    "reason": "Invalid request format or parameters."
-  }
+  "message": "Invalid request format or parameters."
 }
 ```
 
