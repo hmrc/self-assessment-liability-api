@@ -31,9 +31,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: AppConfig)
     extends Logging {
-  def getMtdId(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MtdId] = {
+  def getMtdId(nino: String, stubAgentAuth: Boolean = false)(implicit
+      hc: HeaderCarrier,
+      ec: ExecutionContext
+  ): Future[MtdId] = {
     client
-      .get(url"${appConfig.mtdIdLookup}/mtd-identifier-lookup/nino/$nino")
+      .get(url"${appConfig.mtdIdLookup(stubAgentAuth)}/mtd-identifier-lookup/nino/$nino")
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 => response.json.as[MtdId].toFuture

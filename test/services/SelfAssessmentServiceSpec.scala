@@ -46,10 +46,10 @@ class SelfAssessmentServiceSpec extends SpecBase {
 
   "getMtdIdFromUtr" should {
     "return mtdId when both connectors return successful responses" in {
-      when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
+      when(mockCitizenDetailsConnector.getNino(meq(testUtr), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(Some(testNino)))
 
-      when(mockMtdConnector.getMtdId(meq(testNino))(any(), any()))
+      when(mockMtdConnector.getMtdId(meq(testNino), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(MtdId(testMtdId)))
 
       val result = service.getMtdIdFromUtr(testUtr)
@@ -58,7 +58,7 @@ class SelfAssessmentServiceSpec extends SpecBase {
     }
 
     "fail with Downstream_Error when CitizenDetailsConnector returns no NINO" in {
-      when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
+      when(mockCitizenDetailsConnector.getNino(meq(testUtr), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = service.getMtdIdFromUtr(testUtr)
@@ -67,7 +67,7 @@ class SelfAssessmentServiceSpec extends SpecBase {
     }
 
     "fail with Downstream_Error when CitizenDetailsConnector fails" in {
-      when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
+      when(mockCitizenDetailsConnector.getNino(meq(testUtr), any[Boolean])(any(), any()))
         .thenReturn(Future.failed(Downstream_Error))
 
       val result = service.getMtdIdFromUtr(testUtr)
@@ -76,10 +76,10 @@ class SelfAssessmentServiceSpec extends SpecBase {
     }
 
     "fail with Downstream_Error when MtdIdentifierLookupConnector fails" in {
-      when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
+      when(mockCitizenDetailsConnector.getNino(meq(testUtr), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(Some(testNino)))
 
-      when(mockMtdConnector.getMtdId(meq(testNino))(any(), any()))
+      when(mockMtdConnector.getMtdId(meq(testNino), any[Boolean])(any(), any()))
         .thenReturn(Future.failed(Downstream_Error))
 
       val result = service.getMtdIdFromUtr(testUtr)
@@ -90,10 +90,10 @@ class SelfAssessmentServiceSpec extends SpecBase {
     "correctly pass the NINO from the first connector to the second connector" in {
       val anotherNino = "XY987654Z"
 
-      when(mockCitizenDetailsConnector.getNino(meq(testUtr))(any(), any()))
+      when(mockCitizenDetailsConnector.getNino(meq(testUtr), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(Some(anotherNino)))
 
-      when(mockMtdConnector.getMtdId(meq(anotherNino))(any(), any()))
+      when(mockMtdConnector.getMtdId(meq(anotherNino), any[Boolean])(any(), any()))
         .thenReturn(Future.successful(MtdId(testMtdId)))
 
       val result = service.getMtdIdFromUtr(testUtr)
