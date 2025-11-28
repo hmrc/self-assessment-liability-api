@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class HipResponseError(
     origin: String,
-    service: Option[String],
+    service: Option[String] = None,
     response: HipErrorDetails
 )
 
