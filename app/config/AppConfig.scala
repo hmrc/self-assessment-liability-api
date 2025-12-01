@@ -26,8 +26,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val useStubsForCitizenDetails: Boolean =
     servicesConfig.getBoolean("features.toggles.stubCid")
   val citizenDetailsLookup: String =
-    if useStubsForCitizenDetails then servicesConfig.baseUrl("citizen-details")
-    else servicesConfig.baseUrl("stubs")
+    if useStubsForCitizenDetails then servicesConfig.baseUrl("stubs")
+    else servicesConfig.baseUrl("citizen-details")
   val hipBaseUrl: String = servicesConfig.baseUrl("hip")
 
   def confidenceLevel: ConfidenceLevel =

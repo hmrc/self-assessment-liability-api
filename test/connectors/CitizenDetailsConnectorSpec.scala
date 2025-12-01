@@ -26,7 +26,8 @@ import shared.{HttpWireMock, SpecBase}
 class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      conf = "microservice.services.citizen-details.port" -> server.port()
+      "microservice.services.citizen-details.port" -> server.port(),
+      "features.toggles.stubCid" -> false
     )
     .build()
   private lazy val connector: CitizenDetailsConnector =
