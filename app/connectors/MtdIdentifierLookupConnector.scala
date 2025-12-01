@@ -64,7 +64,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
 
     client
       .get(
-        url"${appConfig.mtdIdLookup}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
+        url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
       )
       .setHeader(requestHeaders*)
       .execute[HttpResponse]

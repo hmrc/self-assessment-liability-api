@@ -31,7 +31,7 @@ class MtdIdentifierLookupConnectorSpec extends SpecBase with HttpWireMock {
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      conf = "microservice.services.mtd-id-lookup.port" -> server.port()
+      conf = "microservice.services.hip.port" -> server.port()
     )
     .build()
 

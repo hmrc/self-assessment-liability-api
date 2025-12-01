@@ -28,9 +28,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val citizenDetailsLookup: String =
     if useStubsForCitizenDetails then servicesConfig.baseUrl("citizen-details")
     else servicesConfig.baseUrl("stubs")
-  val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
-  private val hipBaseUrl: String = servicesConfig.baseUrl("hip")
-  val hipLookup: String = s"$hipBaseUrl/as"
+  val hipBaseUrl: String = servicesConfig.baseUrl("hip")
 
   def confidenceLevel: ConfidenceLevel =
     ConfidenceLevel
