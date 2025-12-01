@@ -22,10 +22,12 @@ import play.api.Logging
 object TaxYearFormatter extends Logging {
 
   def formatter(hipResponse: HipResponse): HipResponse = {
-    val chargesWithReformattedTaxYear = hipResponse.chargeDetails.map { charge =>
+    val chargesWithReformattedTaxYear = hipResponse.chargeDetails.map { charges => charges.map{charge=>
       val newYearFormat = s"${charge.taxYear.toInt}-${charge.taxYear.toInt + 1}"
       charge.copy(taxYear = newYearFormat)
     }
+    }
+
     hipResponse.copy(chargeDetails = chargesWithReformattedTaxYear)
   }
 

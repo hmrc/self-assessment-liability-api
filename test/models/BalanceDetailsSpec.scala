@@ -31,7 +31,7 @@ class BalanceDetailsSpec extends AnyWordSpec with Matchers {
     earliestPendingDueDate = Some(LocalDate.of(2024, 6, 15)),
     totalBalance = 1700.00,
     totalCreditAvailable = 0.00,
-    codedOutDetail = List.empty[CodedOutDetail]
+    codedOutDetail = None
   )
 
   "ChargeDetails model" should {

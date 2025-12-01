@@ -153,8 +153,8 @@ class SelfAssessmentServiceSpec extends SpecBase {
       val today = LocalDate.now()
       HipResponseGenerator.hipResponseGen.map { hipResponse =>
         val transformedHipResponse =
-          hipResponse.copy(chargeDetails = hipResponse.chargeDetails.map { charge =>
-            charge.copy(taxYear = charge.taxYear + "----")
+          hipResponse.copy(chargeDetails = hipResponse.chargeDetails.map { charges =>
+            charges.map(charge=> charge.copy(taxYear = charge.taxYear + "----"))
           })
         when(
           mockHipConnector.getSelfAssessmentData(

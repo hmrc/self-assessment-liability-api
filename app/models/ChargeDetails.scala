@@ -32,7 +32,7 @@ case class ChargeDetails(
     accruingInterest: Option[BigDecimal],
     accruingInterestPeriod: Option[AccruingInterestPeriod],
     accruingInterestRate: Option[BigDecimal],
-    amendments: List[Amendment]
+    amendments: Option[List[Amendment]]
 ) {
   require(
     chargeAmount >= 0,

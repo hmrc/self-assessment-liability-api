@@ -49,7 +49,7 @@ object HipResponseGenerator {
       if (totalPendingBalance > 0) Gen.some(localDateGen) else Gen.const(None)
     totalBalance <- Gen.choose(0.0, 150000.0).map(BigDecimal(_))
     totalCreditAvailable <- Gen.choose(0.0, 20000.0).map(BigDecimal(_))
-    codedOutDetails <- Gen.containerOf[List, CodedOutDetail](codedOutDetailGen)
+    codedOutDetails <- Gen.option(Gen.containerOf[List, CodedOutDetail](codedOutDetailGen))
   } yield BalanceDetails(
     totalOverdueBalance = totalOverdueBalance,
     totalPayableBalance = totalPayableBalance,
@@ -104,7 +104,7 @@ object HipResponseGenerator {
     accruingInterest <- Gen.option(Gen.choose(0.0, 1000.0)).map(_.map(BigDecimal(_)))
     accruingInterestPeriod <- Gen.option(accruingInterestPeriodGen)
     accruingInterestRate <- Gen.option(Gen.choose(0.0, 15.0)).map(_.map(BigDecimal(_)))
-    amendments <- Gen.containerOf[List, Amendment](amendmentsGen)
+    amendments <- Gen.option(Gen.containerOf[List, Amendment](amendmentsGen))
   } yield ChargeDetails(
     chargeId = chargeId,
     creationDate = creationDate,
@@ -160,10 +160,10 @@ object HipResponseGenerator {
 
   val hipResponseGen: Gen[HipResponse] = for {
     balanceDetails <- balanceDetailsGen
-    chargeDetails <- Gen.containerOf[List, ChargeDetails](chargeDetailsGen)
-    refundDetails <- Gen.containerOf[List, RefundDetails](refundDetailsGen)
-    paymentHistoryDetails <-
-      Gen.containerOf[List, PaymentHistoryDetails](paymentHistoryDetailsGen)
+    chargeDetails <- Gen.option(Gen.containerOf[List, ChargeDetails](chargeDetailsGen))
+    refundDetails <- Gen.option(Gen.containerOf[List, RefundDetails](refundDetailsGen))
+    paymentHistoryDetails <-Gen.option(
+      Gen.containerOf[List, PaymentHistoryDetails](paymentHistoryDetailsGen))
 
   } yield HipResponse(
     balanceDetails = balanceDetails,

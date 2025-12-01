@@ -31,7 +31,7 @@ class TaxYearFormatterSpec extends SpecBase {
     earliestPendingDueDate = None,
     totalBalance = 100,
     totalCreditAvailable = 100,
-    codedOutDetail = List.empty
+    codedOutDetail = None
   )
 
   val charge = ChargeDetails(
@@ -46,7 +46,7 @@ class TaxYearFormatterSpec extends SpecBase {
     accruingInterest = None,
     accruingInterestPeriod = None,
     accruingInterestRate = None,
-    amendments = List.empty
+    amendments = None
   )
 
   "formatter" should {
@@ -54,18 +54,18 @@ class TaxYearFormatterSpec extends SpecBase {
     "reformat all tax years in a hip response object from YYYY to YYYY-YYYY+1" in {
       val hipResponse = HipResponse(
         balanceDetails = balanceDetails,
-        chargeDetails = List(charge),
-        refundDetails = List.empty,
-        paymentHistoryDetails = List.empty
+        chargeDetails = Some(List(charge)),
+        refundDetails = None,
+        paymentHistoryDetails = None
       )
-      TaxYearFormatter.formatter(hipResponse).chargeDetails.map(_.taxYear mustEqual "2019-2020")
+      TaxYearFormatter.formatter(hipResponse).chargeDetails.map(_.map(_.taxYear mustEqual "2019-2020"))
     }
     "do nothing if chargeDetails is empty" in {
       val hipResponse = HipResponse(
         balanceDetails = balanceDetails,
-        chargeDetails = List.empty,
-        refundDetails = List.empty,
-        paymentHistoryDetails = List.empty
+        chargeDetails = None,
+        refundDetails = None,
+        paymentHistoryDetails = None
       )
       TaxYearFormatter.formatter(hipResponse) mustEqual hipResponse
     }

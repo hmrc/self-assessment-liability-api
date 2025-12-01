@@ -35,7 +35,7 @@ class ChargeDetailsSpec extends AnyWordSpec with Matchers {
     accruingInterest = None,
     accruingInterestPeriod = None,
     accruingInterestRate = None,
-    amendments = List.empty
+    amendments = None
   )
 
   "ChargeDetails model" should {

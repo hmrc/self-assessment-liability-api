@@ -28,7 +28,7 @@ case class BalanceDetails(
     earliestPendingDueDate: Option[LocalDate],
     totalBalance: BigDecimal,
     totalCreditAvailable: BigDecimal,
-    codedOutDetail: List[CodedOutDetail]
+    codedOutDetail: Option[List[CodedOutDetail]]
 ) {
   require(
     totalOverdueBalance >= 0,
