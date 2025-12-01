@@ -33,11 +33,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.SelfAssessmentService
 import shared.{HttpWireMock, SpecBase}
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, ~}
-import uk.gov.hmrc.auth.core.*
 import utils.SelfAssessmentEnrolments.*
+
 import java.time.LocalDate
 import scala.concurrent.Future
 
@@ -147,7 +148,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
       .thenReturn(Future.successful("mtdId"))
 
     when(
@@ -174,7 +175,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
     ).thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
       .thenReturn(Future.successful("mtdId"))
 
     when(
@@ -202,7 +203,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
       .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
 
     val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
@@ -225,7 +226,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
       .thenReturn(Future.failed(Downstream_Error))
 
     val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
@@ -249,7 +250,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.successful("mtdId"))
 
       when(
@@ -293,7 +294,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.successful("mtdId"))
       when(
         authConnector.authorise(eqTo(mtdSaEnrolment("mtdId")), eqTo(EmptyRetrieval))(any(), any())
@@ -319,7 +320,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
       val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
       result.failed.futureValue mustBe Service_Currently_Unavailable_Error
@@ -340,7 +341,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.failed(Downstream_Error))
       val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
       result.failed.futureValue mustBe Downstream_Error
@@ -402,7 +403,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.successful("mtdId"))
 
       when(
@@ -441,7 +442,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.successful("mtdId"))
 
       when(
@@ -480,7 +481,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
       val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
       result.failed.futureValue mustBe Service_Currently_Unavailable_Error
@@ -511,7 +512,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"), any[Boolean])(any()))
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
         .thenReturn(Future.failed(Downstream_Error))
       val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
       result.failed.futureValue mustBe Downstream_Error

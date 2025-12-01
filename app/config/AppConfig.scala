@@ -23,13 +23,12 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel
 
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
-  val useStubsForAgentAuthorisation: Boolean =
-    servicesConfig.getBoolean("features.toggles.useStubsForAgentAuth")
-  def citizenDetailsLookup(shouldStub: Boolean): String = if shouldStub then
-    servicesConfig.baseUrl("stubs")
-  else servicesConfig.baseUrl("citizen-details")
-  def mtdIdLookup(shouldStub: Boolean): String =
-    if shouldStub then servicesConfig.baseUrl("stubs") else servicesConfig.baseUrl("mtd-id-lookup")
+  val useStubsForCitizenDetails: Boolean =
+    servicesConfig.getBoolean("features.toggles.stubCid")
+  val citizenDetailsLookup: String =
+    if useStubsForCitizenDetails then servicesConfig.baseUrl("citizen-details")
+    else servicesConfig.baseUrl("stubs")
+  val mtdIdLookup: String = servicesConfig.baseUrl("mtd-id-lookup")
   private val hipBaseUrl: String = servicesConfig.baseUrl("hip")
   val hipLookup: String = s"$hipBaseUrl/as"
 

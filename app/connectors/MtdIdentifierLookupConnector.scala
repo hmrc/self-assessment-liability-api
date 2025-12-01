@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: AppConfig)
     extends Logging {
-  def getMtdId(nino: String, stubAgentAuth: Boolean = false)(implicit
+  def getMtdId(nino: String)(implicit
       hc: HeaderCarrier,
       ec: ExecutionContext
   ): Future[MtdId] = {
@@ -64,7 +64,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
 
     client
       .get(
-        url"${appConfig.mtdIdLookup(stubAgentAuth)}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
+        url"${appConfig.mtdIdLookup}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
       )
       .setHeader(requestHeaders*)
       .execute[HttpResponse]
