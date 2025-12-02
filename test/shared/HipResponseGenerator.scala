@@ -162,8 +162,9 @@ object HipResponseGenerator {
     balanceDetails <- balanceDetailsGen
     chargeDetails <- Gen.option(Gen.containerOf[List, ChargeDetails](chargeDetailsGen))
     refundDetails <- Gen.option(Gen.containerOf[List, RefundDetails](refundDetailsGen))
-    paymentHistoryDetails <-Gen.option(
-      Gen.containerOf[List, PaymentHistoryDetails](paymentHistoryDetailsGen))
+    paymentHistoryDetails <- Gen.option(
+      Gen.containerOf[List, PaymentHistoryDetails](paymentHistoryDetailsGen)
+    )
 
   } yield HipResponse(
     balanceDetails = balanceDetails,

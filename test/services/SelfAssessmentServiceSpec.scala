@@ -154,7 +154,7 @@ class SelfAssessmentServiceSpec extends SpecBase {
       HipResponseGenerator.hipResponseGen.map { hipResponse =>
         val transformedHipResponse =
           hipResponse.copy(chargeDetails = hipResponse.chargeDetails.map { charges =>
-            charges.map(charge=> charge.copy(taxYear = charge.taxYear + "----"))
+            charges.map(charge => charge.copy(taxYear = charge.taxYear + "----"))
           })
         when(
           mockHipConnector.getSelfAssessmentData(

@@ -58,7 +58,10 @@ class TaxYearFormatterSpec extends SpecBase {
         refundDetails = None,
         paymentHistoryDetails = None
       )
-      TaxYearFormatter.formatter(hipResponse).chargeDetails.map(_.map(_.taxYear mustEqual "2019-2020"))
+      TaxYearFormatter
+        .formatter(hipResponse)
+        .chargeDetails
+        .map(_.map(_.taxYear mustEqual "2019-2020"))
     }
     "do nothing if chargeDetails is empty" in {
       val hipResponse = HipResponse(
