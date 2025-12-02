@@ -16,6 +16,7 @@
 
 package models
 
+import org.scalatest.matchers.must.Matchers.mustEqual
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -43,6 +44,30 @@ class ChargeDetailsSpec extends AnyWordSpec with Matchers {
     "Allow construction when chargeAmount and outstandingAmount is zero or positive" in {
       validChargeDetail.chargeAmount shouldBe >=(BigDecimal(0))
       validChargeDetail.outstandingAmount shouldBe >=(BigDecimal(0))
+    }
+
+    "Allow construction when amendments is Some empty list " in {
+      val emptyAmendmentCharge = validChargeDetail.copy(amendments = Some(List.empty))
+      emptyAmendmentCharge.amendments should not be empty
+      emptyAmendmentCharge.amendments.map(_ mustEqual List.empty[Amendment])
+    }
+    "Allow construction when amendments is populated with an entry " in {
+      val chargeWithAmendment = validChargeDetail.copy(amendments =
+        Some(
+          List(
+            Amendment(
+              amendmentDate = LocalDate.now(),
+              amendmentAmount = 100,
+              amendmentReason = "credit",
+              isPaymentRelated = false,
+              paymentMethod = None,
+              paymentDate = None
+            )
+          )
+        )
+      )
+      chargeWithAmendment.amendments should not be empty
+      chargeWithAmendment.amendments.map(_.map(_.isPaymentRelated shouldBe (false)))
     }
 
     "Throw illegal argument exception if chargeAmount is negative" in {

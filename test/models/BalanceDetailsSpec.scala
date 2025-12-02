@@ -16,6 +16,7 @@
 
 package models
 
+import org.scalatest.matchers.must.Matchers.mustEqual
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -44,6 +45,26 @@ class BalanceDetailsSpec extends AnyWordSpec with Matchers {
       validBalanceDetail.totalBalance shouldBe >=(BigDecimal(0))
       validBalanceDetail.earliestPayableDueDate shouldBe defined
       validBalanceDetail.earliestPendingDueDate shouldBe defined
+    }
+    "allow construction when codedOut is an empty list" in {
+      val emptyCodedOutList = validBalanceDetail.copy(codedOutDetail = Some(List.empty))
+      emptyCodedOutList.codedOutDetail should not be empty
+      emptyCodedOutList.codedOutDetail.map(_ mustEqual List.empty[CodedOutDetail])
+    }
+    "allow construction when codedOut is present" in {
+      val emptyCodedOutList = validBalanceDetail.copy(codedOutDetail =
+        Some(
+          List(
+            CodedOutDetail(
+              totalAmount = 100,
+              effectiveStartDate = LocalDate.now(),
+              effectiveEndDate = LocalDate.now()
+            )
+          )
+        )
+      )
+      emptyCodedOutList.codedOutDetail should not be empty
+      emptyCodedOutList.codedOutDetail.map(_.map(_.totalAmount mustEqual 100))
     }
 
     "Throw illegal argument exception if totalOverdueBalance is negative" in {
