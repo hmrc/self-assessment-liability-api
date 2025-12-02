@@ -162,6 +162,8 @@ components:
             - type: string
               description: Error message.
       additionalProperties: false
+      required:
+        - message
     successResponse:
       type: object
       required:
