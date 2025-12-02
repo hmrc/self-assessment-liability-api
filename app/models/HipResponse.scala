@@ -20,8 +20,8 @@ import play.api.libs.json.{Json, OFormat}
 
 case class HipResponse(
     balanceDetails: BalanceDetails,
-    chargeDetails: List[ChargeDetails]= List.empty,
-    refundDetails: List[RefundDetails]= List.empty,
+    chargeDetails: List[ChargeDetails] = List.empty,
+    refundDetails: List[RefundDetails] = List.empty,
     paymentHistoryDetails: List[PaymentHistoryDetails] = List.empty
 )
 
