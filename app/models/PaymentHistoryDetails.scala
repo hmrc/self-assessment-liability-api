@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 case class PaymentHistoryDetails(
     paymentAmount: BigDecimal,
-    paymentReference: String,
+    paymentReference: Option[String],
     paymentMethod: Option[String],
     paymentDate: LocalDate,
     processedDate: Option[LocalDate],

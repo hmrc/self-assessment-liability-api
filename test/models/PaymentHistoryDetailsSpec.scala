@@ -25,7 +25,7 @@ class PaymentHistoryDetailsSpec extends AnyWordSpec with Matchers {
 
   val validPaymentHistory = PaymentHistoryDetails(
     paymentAmount = BigDecimal(500),
-    paymentReference = "PAY123456",
+    paymentReference = Some("PAY123456"),
     paymentMethod = Some("Bank Transfer"),
     paymentDate = LocalDate.of(2025, 4, 11),
     processedDate = Some(LocalDate.of(2025, 4, 15)),
@@ -45,6 +45,12 @@ class PaymentHistoryDetailsSpec extends AnyWordSpec with Matchers {
 
       exception shouldBe a[IllegalArgumentException]
       exception.getMessage should include("paymentAmount must be >= 0 but was -50")
+    }
+
+    "Handle none paymentReference correctly" in {
+      val exception = validPaymentHistory.copy(paymentReference = None)
+
+      exception.paymentReference shouldBe None
     }
   }
 }
