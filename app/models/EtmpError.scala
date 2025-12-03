@@ -16,11 +16,10 @@
 
 package models
 
-import play.api.libs.json.{JsPath, Reads}
+import play.api.libs.json.{Json, OFormat}
 
-case class MtdId(mtdbsa: String)
+case class EtmpError(processingDate: String, code: String, text: String)
 
-object MtdId {
-  implicit val reads: Reads[MtdId] =
-    (JsPath \ "success" \ "taxPayerDisplayResponse" \ "mtdId").read[String].map(MtdId.apply)
+object EtmpError {
+  implicit val format: OFormat[EtmpError] = Json.format[EtmpError]
 }

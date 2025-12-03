@@ -54,7 +54,7 @@ class HipConnector @Inject() (client: HttpClientV2, appConfig: AppConfig) extend
     )
     client
       .get(
-        url"${appConfig.hipLookup}/self-assessment/account/$utr/liability-details"
+        url"${appConfig.hipBaseUrl}/as/self-assessment/account/$utr/liability-details"
       )
       .transform(_.withQueryStringParameters(queryParameters*))
       .setHeader(headers*)
