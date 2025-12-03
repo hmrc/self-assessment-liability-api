@@ -34,7 +34,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{AuthenticateRequestAction, ValidateRequestAction}
-import models.RequestWithUtr
+import models.{HipResponse, RequestWithUtr}
 import models.ServiceErrors.{
   Downstream_Error,
   Invalid_Start_Date_Error,
@@ -43,8 +43,9 @@ import models.ServiceErrors.{
 }
 import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito.when
+import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -95,6 +96,29 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
         status(result) mustBe OK
         contentAsJson(result) mustBe Json.toJson(hipResponse)
       }
+    }
+    "successfully parse a payload with balance details only" in {
+      val minimalHipResponseJson: JsValue = Json.obj(
+        "balanceDetails" -> Json.obj(
+          "totalOverdueBalance" -> 0,
+          "totalPayableBalance" -> 0,
+          "totalPendingBalance" -> 0,
+          "totalBalance" -> 0,
+          "totalCreditAvailable" -> 0
+        )
+      )
+      val hipResponse = minimalHipResponseJson.as[HipResponse]
+      when(
+        mockService.viewAccountService(
+          any(),
+          meq(LocalDate.of(validDate.getYear - 1, Month.APRIL, 6)),
+          meq(validDate)
+        )(any())
+      )
+        .thenReturn(Future.successful(hipResponse))
+      val result = request("1234567890", validDate)
+      status(result) mustBe OK
+
     }
   }
   "return bad request if a date with bad format is provided" in {
