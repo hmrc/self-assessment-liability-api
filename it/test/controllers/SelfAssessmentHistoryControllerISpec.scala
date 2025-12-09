@@ -25,9 +25,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
-import utils.IntegrationSpecBase
+import utils.{IntegrationSpecBase, TaxYearFormatter}
 import utils.constants.ErrorMessageConstansts.*
-import utils.TaxYearFormatter
+
 import java.net.URI
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -47,12 +47,16 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
   val dateTo: String = LocalDate.now().toString
   val cidPayload: String = Json.toJson(cidPerson).toString
   val mtdId = MtdId("mtdId")
-  val mtdIdPayload: String = Json.obj("mtdbsa" -> "mtdId").toString
+  val mtdIdPayload: String = Json
+    .obj("success" -> Json.obj("taxPayerDisplayResponse" -> Json.obj("mtdId" -> "MtdItId")))
+    .toString
   val baseUrl = s"http://localhost:$port/$utr?fromDate=$dateFrom"
   val hipUrl = s"/as/self-assessment/account/$utr/liability-details?dateFrom=$dateFrom&dateTo=$dateTo"
   val cidUrl = s"/citizen-details/sautr/$utr"
-  val mtdLookupUrl = s"/mtd-identifier-lookup/nino/$nino"
-
+  val mtdLookupUrl = s"/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
+  private val hipError = Json
+    .toJson(HipResponseError("hip", None, HipErrorDetails(List(HipError("badType", "badMessage")))))
+    .toString
   "Integration Tests for SA History Controller" must {
     "CID connection" should {
       "return 200 with the correct response in success journey" in {
@@ -128,7 +132,7 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
     "mtd lookup service" should {
       "return 500 if call fails with a 500 response" in {
         simulateGet(cidUrl, OK, cidPayload)
-        simulateGet(mtdLookupUrl, INTERNAL_SERVER_ERROR, "")
+        simulateGet(mtdLookupUrl, INTERNAL_SERVER_ERROR,  Json.obj().toString)
         val result =
           Await.result(
             client
@@ -154,7 +158,7 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
       }
       "return 503 if  call fails due to bad payload" in {
         simulateGet(cidUrl, OK, cidPayload)
-        simulateGet(mtdLookupUrl, NOT_FOUND, "")
+        simulateGet(mtdLookupUrl, NOT_FOUND,  Json.obj().toString)
         val result =
           Await.result(
             client
@@ -162,13 +166,13 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
               .setHeader("Authorization" -> "Bearer 1234")
               .execute[HttpResponse], 5.seconds)
 
-        result.status mustEqual SERVICE_UNAVAILABLE
-        result.json.as[ApiErrorResponses].message mustEqual SERVICE_UNAVAILABLE_RESPONSE
+        result.status mustEqual INTERNAL_SERVER_ERROR
+        result.json.as[ApiErrorResponses].message mustEqual INTERNAL_ERROR_RESPONSE
       }
 
-      "return 503 if call fails with any other response" in {
+      "return 503 if call fails with a 503 response" in {
         simulateGet(cidUrl, OK, cidPayload)
-        simulateGet(mtdLookupUrl, REQUEST_TIMEOUT, Json.obj().toString)
+        simulateGet(mtdLookupUrl, SERVICE_UNAVAILABLE, Json.obj().toString)
         val result =
           Await.result(
             client
