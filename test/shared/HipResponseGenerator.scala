@@ -151,7 +151,7 @@ object HipResponseGenerator {
     allocationReference <- Gen.listOf(Gen.alphaNumStr)
   } yield PaymentHistoryDetails(
     paymentAmount = paymentAmount,
-    paymentReference = paymentReference,
+    paymentReference = Some(paymentReference),
     paymentMethod = paymentMethod,
     paymentDate = paymentDate,
     processedDate = processedDate,
