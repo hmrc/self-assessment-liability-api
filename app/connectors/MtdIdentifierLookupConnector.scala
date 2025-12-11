@@ -61,7 +61,9 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       "X-Regime-Type" -> "ITSA",
       "X-Transmitting-System" -> "HIP"
     )
-    logger.info(s"Getting mtdid from: ${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino")
+    logger.info(
+      s"Getting mtdid from: ${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
+    )
     client
       .get(
         url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
