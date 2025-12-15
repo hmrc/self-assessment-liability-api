@@ -54,6 +54,8 @@ class DocumentationControllerISpec extends IntegrationSpecBase {
         (json \ "api" \ "context").as[String] mustEqual "individuals/self-assessment/breakdown"
         (json \ "api" \ "description").as[String] mustEqual descriptionText
         (json \ "api" \ "name").as[String] mustEqual "View Self Assessment Account"
+        (json \ "api" \ "versions" \ 0 \ "access" \ "type").as[String] mustEqual "PRIVATE"
+        (json \ "api" \ "versions" \ 0 \ "access" \ "isTrial").as[Boolean] mustEqual true
       }
     }
   }
