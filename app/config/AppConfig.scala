@@ -34,6 +34,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   lazy val apiPlatformStatus: String = servicesConfig.getString("features.api-platform.status")
   lazy val apiPlatformEndpointsEnabled: Boolean =
     servicesConfig.getBoolean("features.api-platform.endpoints-enabled")
+  lazy val overrideAuthHeader: Boolean =
+    servicesConfig.getBoolean("features.toggles.overrideAuthorizationHeader")
 
   val hipClientId: String = config.get[String]("microservice.services.hip.clientId")
   val hipClientSecret: String = config.get[String]("microservice.services.hip.clientSecret")
