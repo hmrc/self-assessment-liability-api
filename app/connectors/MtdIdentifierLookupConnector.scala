@@ -55,7 +55,6 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       if appConfig.overrideAuthHeader then
         hc.authorization.map(_.value).getOrElse(s"Basic $encodedToken")
       else s"Basic $encodedToken"
-    logger.warn(s" the token is $authorizationHeader")
     val requestHeaders = Seq(
       "CorrelationId" -> correlationID,
       "Authorization" -> authorizationHeader,
