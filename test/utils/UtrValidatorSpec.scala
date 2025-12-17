@@ -21,10 +21,10 @@ import shared.SpecBase
 class UtrValidatorSpec extends SpecBase {
 
   // List of valid values used for unit test
-  val validList = List("1234567890", "12345")
+  val validList = List("1234567890", "9876543210")
 
   // List of invalid values used for unit test
-  val invalidList = List("", "12345678901", "ABC@123", "ABC123", "A12345678", "AB123")
+  val invalidList = List("", "12345678901", "ABC@123", "ABC123", "A12345678", "AB123", "12345")
 
   "UtrValidator" should {
 
