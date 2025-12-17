@@ -45,6 +45,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
   ): Future[MtdId] = {
     val correlationID = UUID.randomUUID.toString
     logger.info(s"calling HIP with $correlationID to get an MTD ID")
+    logger.info(s"calling stubs with ${hc.authorization} auth header")
     val encodedAuthToken = Base64.getEncoder.encodeToString(
       s"${appConfig.hipClientId}:${appConfig.hipClientSecret}".getBytes(Charsets.UTF_8)
     )
@@ -68,7 +69,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       .get(
         url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
       )
-      .setHeader(requestHeaders*)
+      .transform(_.addHttpHeaders(requestHeaders*))
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 => response.json.as[MtdId].toFuture
