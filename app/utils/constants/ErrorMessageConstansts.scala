@@ -22,5 +22,5 @@ object ErrorMessageConstansts {
   val FORBIDDEN_RESPONSE = "Access not permitted."
   val INTERNAL_ERROR_RESPONSE = "Unexpected internal error. Please contact service desk."
   val SERVICE_UNAVAILABLE_RESPONSE = "Service unavailable. Please try again later."
-  val NOT_FOUND_RESPONSE = "The requested resource could not be found."
+  val NOT_FOUND_RESPONSE = "No data found for the UTR provided."
 }
