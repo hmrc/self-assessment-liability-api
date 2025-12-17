@@ -1,0 +1,28 @@
+meta {
+  name: Exchange Auh Code
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url}}/oauth/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  content-type: application/x-www-form-urlencoded
+}
+
+body:form-urlencoded {
+  code: 3467132ba389496e998693bc6ecdcab9
+  client_id: {{client_id}}
+  client_secret: {{client_secret}}
+  redirect_uri: urn:ietf:wg:oauth:2.0:oob
+  grant_type: authorization_code
+}
+
+script:post-response {
+  bru.setEnvVar("bearer_token", "Bearer " + res.body.access_token)
+  bru.setEnvVar("refresh_token",res.body.refresh_token)
+}

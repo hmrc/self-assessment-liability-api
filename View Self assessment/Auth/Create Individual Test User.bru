@@ -1,0 +1,30 @@
+meta {
+  name: Create Individual Test User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/create-test-user/individuals
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{app_bearer_token}}
+}
+
+body:json {
+  {
+    "serviceNames": [
+      "self-assessment"
+    ]
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("testUserId",res.body.userId)
+  bru.setEnvVar("testUserPassword",res.body.password)
+  bru.setEnvVar("utr",res.body.saUtr)
+  
+}
