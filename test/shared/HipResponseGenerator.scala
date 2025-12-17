@@ -148,7 +148,7 @@ object HipResponseGenerator {
     paymentMethod <- Gen.option(Gen.oneOf("Bank Transfer", "Credit Card", "Direct Debit", "Cheque"))
     paymentDate <- localDateGen
     processedDate <- Gen.option(localDateGen)
-    allocationReference <- Gen.listOf(Gen.alphaNumStr)
+    allocationReference <- Gen.option(Gen.alphaNumStr)
   } yield PaymentHistoryDetails(
     paymentAmount = paymentAmount,
     paymentReference = Some(paymentReference),
