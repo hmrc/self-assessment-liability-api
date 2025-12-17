@@ -45,15 +45,20 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
   ): Future[MtdId] = {
     val correlationID = UUID.randomUUID.toString
     logger.info(s"calling HIP with $correlationID to get an MTD ID")
-    val encodedAuthToken = Base64.getEncoder.encodeToString(
+    val encodedToken = Base64.getEncoder.encodeToString(
       s"${appConfig.hipClientId}:${appConfig.hipClientSecret}".getBytes(Charsets.UTF_8)
     )
     def getTimeStamp: String = ZonedDateTime
       .now(ZoneId.of("UTC"))
       .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+    val authorizationHeader =
+      if appConfig.overrideAuthHeader then
+        hc.authorization.map(_.value).getOrElse(s"Basic $encodedToken")
+      else s"Basic $encodedToken"
+    logger.warn(s" the token is $authorizationHeader")
     val requestHeaders = Seq(
       "CorrelationId" -> correlationID,
-      "Authorization" -> s"Basic $encodedAuthToken",
+      "Authorization" -> authorizationHeader,
       "X-Message-Type" -> "TaxpayerDisplay",
       "X-Receipt-Date" -> getTimeStamp,
       "Content-Type" -> "application/json",
@@ -65,7 +70,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       .get(
         url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
       )
-      .transform(_.addHttpHeaders(requestHeaders*))
+      .setHeader(requestHeaders*)
       .execute[HttpResponse]
       .flatMap {
         case response if response.status == 200 => response.json.as[MtdId].toFuture
