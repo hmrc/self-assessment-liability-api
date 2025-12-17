@@ -29,7 +29,7 @@ class PaymentHistoryDetailsSpec extends AnyWordSpec with Matchers {
     paymentMethod = Some("Bank Transfer"),
     paymentDate = LocalDate.of(2025, 4, 11),
     processedDate = Some(LocalDate.of(2025, 4, 15)),
-    allocationReference = List("AB1234567")
+    allocationReference = Some("AB1234567")
   )
 
   "PaymentHistoryDetails model" should {
