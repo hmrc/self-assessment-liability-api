@@ -34,16 +34,15 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{AuthenticateRequestAction, ValidateRequestAction}
-import models.{HipResponse, RequestWithUtr}
 import models.ServiceErrors.{
   Downstream_Error,
   Invalid_Start_Date_Error,
   Json_Validation_Error,
   No_Data_Found_Error
 }
+import models.{HipResponse, RequestWithUtr}
 import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito.when
-import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.*

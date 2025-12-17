@@ -27,6 +27,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import shared.{HipResponseGenerator, SpecBase}
 import utils.TaxYearFormatter
+
 import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
