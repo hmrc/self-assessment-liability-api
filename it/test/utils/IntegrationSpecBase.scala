@@ -65,7 +65,6 @@ trait IntegrationSpecBase
    "microservice.services.citizen-details.port" ->server.port(),
    "microservice.services.mtd-id-lookup.port" -> server.port(),
    "microservice.services.hip.port" -> server.port(),
-      "features.toggles.stubCid" -> false, 
    "auditing.enabled" -> false,
    "metrics.enabled" -> false
     )
