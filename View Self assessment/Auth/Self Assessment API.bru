@@ -1,0 +1,20 @@
+meta {
+  name: Self Assessment API
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{url}}/individuals/self-assessment/breakdown/:utr
+  body: none
+  auth: inherit
+}
+
+params:path {
+  utr: 3300000504
+}
+
+headers {
+  Authorization: {{bearer_token}}
+  ~Authorization: Bearer BXQ3/Treo4kQCZvVcCqKPnXdX6MK/4KSgoOaNnFthm0OlzlFlAvqSHRDA7FTSjsKntN9afUJVptEDeeEqiu0wzdEJnO7P1W4088B970qIn9Kc8ReeCC1p/4W7NGxGcfyLsYk94P5ZIRotkq5zoR3K9k+LxHymY6lrlKHpFmf1nxt434MQgDNTbqUTDTw0VwB/SsCJHiDyv5jJQREo7nuFQ==
+}

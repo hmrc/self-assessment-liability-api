@@ -1,0 +1,28 @@
+meta {
+  name: Create Refresh Token
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{url}}/oauth/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  content-type: application/x-www-form-urlencoded
+}
+
+body:form-urlencoded {
+  client_secret: {{client_secret}}
+  client_id: {{client_id}}
+  grant_type: refresh_token
+  refresh_token: {{refresh_token}}
+}
+
+script:post-response {
+  bru.setEnvVar("bearer_token", "Bearer " + res.body.access_token)
+  bru.setEnvVar("refresh_token",res.body.refresh_token)
+  
+}

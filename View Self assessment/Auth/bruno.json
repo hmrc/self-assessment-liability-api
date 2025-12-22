@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "name": "Auth",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "size": 0.005767822265625,
+  "filesCount": 14
+}
