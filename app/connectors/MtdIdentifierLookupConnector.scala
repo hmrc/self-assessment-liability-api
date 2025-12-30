@@ -55,7 +55,6 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       if appConfig.overrideAuthHeader then
         hc.authorization.map(_.value).getOrElse(s"Basic $encodedToken")
       else s"Basic $encodedToken"
-    logger.warn(s" the token is $authorizationHeader")
     val requestHeaders = Seq(
       "CorrelationId" -> correlationID,
       "Authorization" -> authorizationHeader,
@@ -66,6 +65,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       "X-Regime-Type" -> "ITSA",
       "X-Transmitting-System" -> "HIP"
     )
+    logger.info(s" the token is ${authorizationHeader.trim.takeWhile(c => !c.isWhitespace)}")
     client
       .get(
         url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
