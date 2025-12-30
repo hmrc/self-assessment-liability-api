@@ -65,7 +65,7 @@ class MtdIdentifierLookupConnector @Inject() (client: HttpClientV2, appConfig: A
       "X-Regime-Type" -> "ITSA",
       "X-Transmitting-System" -> "HIP"
     )
-    logger.warn(s" the token is ${authorizationHeader.trim.takeWhile(c => !c.isWhitespace)}")
+    logger.info(s" the token is ${authorizationHeader.trim.takeWhile(c => !c.isWhitespace)}")
     client
       .get(
         url"${appConfig.hipBaseUrl}/etmp/RESTAdapter/itsa/taxpayer/business-details?nino=$nino"
