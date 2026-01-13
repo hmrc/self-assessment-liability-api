@@ -18,7 +18,7 @@ package controllers.actions
 
 import config.AppConfig
 import models.RequestWithUtr
-import models.ServiceErrors.Unauthorised_Error
+import models.ServiceErrors.{Downstream_Error, Unauthorised_Error}
 import play.api.Logging
 import play.api.mvc.*
 import services.SelfAssessmentService
@@ -77,13 +77,18 @@ class AuthenticateRequestAction @Inject() (
     authorised(legacySaEnrolment(request.utr)) {
       Future.successful(None)
     }.recoverWith { case _: AuthorisationException =>
-      selfAssessmentService
-        .getMtdIdFromUtr(request.utr)
-        .flatMap { mtdId =>
-          authorised(mtdSaEnrolment(mtdId)) {
-            Future.successful(None)
+      authorised(hasMtdEnrolment) {
+        selfAssessmentService
+          .getMtdIdFromUtr(request.utr)
+          .flatMap { mtdId =>
+            authorised(mtdSaEnrolment(mtdId)) {
+              Future.successful(None)
+            }
           }
-        }
+      }.recoverWith { case _: AuthorisationException =>
+        logger.info("User authorisation failed - no valid enrolments found")
+        Future.failed(Unauthorised_Error)
+      }
     }
   }
 
@@ -94,16 +99,18 @@ class AuthenticateRequestAction @Inject() (
       authorised(delegatedLegacySaEnrolment(request.utr)) {
         Future.successful(None)
       }.recoverWith { case _: AuthorisationException =>
-        selfAssessmentService
-          .getMtdIdFromUtr(request.utr)
-          .flatMap { mtdId =>
-            authorised(delegatedMtdEnrolment(mtdId)) {
-              Future.successful(None)
-            }.recoverWith { case _: AuthorisationException =>
-              logger.info("Agent authorisation failed as agent client relationship not established")
-              throw Unauthorised_Error
+        authorised(hasMtdEnrolment) {
+          selfAssessmentService
+            .getMtdIdFromUtr(request.utr)
+            .flatMap { mtdId =>
+              authorised(delegatedMtdEnrolment(mtdId)) {
+                Future.successful(None)
+              }
             }
-          }
+        }.recoverWith { case _: AuthorisationException =>
+          logger.info("Agent authorisation failed - no delegated enrolments found")
+          Future.failed(Unauthorised_Error)
+        }
       }
     }
   }

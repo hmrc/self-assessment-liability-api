@@ -44,4 +44,6 @@ object SelfAssessmentEnrolments {
     Mtd_Identifier,
     mtdId
   )
+
+  def hasMtdEnrolment: Predicate = Enrolment(Mtd_Enrolment_Key)
 }

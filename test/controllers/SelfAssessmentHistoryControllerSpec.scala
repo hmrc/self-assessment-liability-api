@@ -51,6 +51,7 @@ import play.api.test.Helpers.*
 import services.SelfAssessmentService
 import shared.{HipResponseGenerator, SpecBase}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{LocalDate, Month}
 import scala.concurrent.{ExecutionContext, Future}
@@ -85,10 +86,10 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
       forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
         when(
           mockService.viewAccountService(
-            any(),
-            meq(LocalDate.of(validDate.getYear - 1, Month.APRIL, 6)),
-            meq(validDate)
-          )(any())
+            any[String],
+            any[LocalDate],
+            any[LocalDate]
+          )(any[HeaderCarrier])
         )
           .thenReturn(Future.successful(hipResponse))
         val result = request("1234567890", validDate)
