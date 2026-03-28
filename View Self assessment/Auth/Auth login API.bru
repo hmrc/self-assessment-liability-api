@@ -1,0 +1,70 @@
+meta {
+  name: Auth login API
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8585/government-gateway/session/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "credId": "a-cred-id",
+    "affinityGroup": "Organisation",
+    "confidenceLevel": 250,
+    "credentialStrength": "strong",
+    "credentialRole": "Admin",
+    "enrolments": [
+      {
+        "key": "IR-SA",
+        "identifiers": [
+          {
+            "key": "UTR",
+            "value": "123456789"
+          }
+        ],
+        "state": "Activated"
+      }
+    ],
+    "gatewayToken": "SomeToken",
+    "groupIdentifier": "SomeGroupIdentifier",
+    "nino": "NH123456D",
+    "usersName": "Lisa Nicole Brennan",
+    "email": "lisa.brennan@some.domain.com",
+    "description": "SJ Junior",
+    "agentFriendlyName": "Johhny English",
+    "agentCode": "Oh Oh Seven",
+    "agentId": "007",
+    "itmpData": {
+      "givenName": "Lisa",
+      "middleName": "Nicole",
+      "familyName": "Brennan",
+      "birthdate": "1988-01-04",
+      "address": {
+        "line1": "10 The Causeway",
+        "line2": "Little London",
+        "line3": "Blackheath",
+        "line4": "Surrey",
+        "postCode": "GU99 ZBH",
+        "countryName": "United Kingdom",
+        "countryCode": "GB"
+      }
+    },
+    "gatewayInformation": {
+      "gatewayToken": "SomeToken"
+    },
+    "mdtpInformation": {
+      "deviceId": "mdtpDeviceId",
+      "sessionId": "mdtpSession"
+    },
+    "unreadMessageCount": 1,
+    "oauthTokens": {
+      "accessToken": "accessToken",
+      "refreshToken": "refreshToken",
+      "idToken": "idToken"
+    }
+  }
+}

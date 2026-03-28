@@ -1,0 +1,20 @@
+meta {
+  name: Get Auth Code
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{auth_code_url}}/oauth/authorize?client_id={{client_id}}&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=read:self-assessment&response_type=code
+  body: none
+  auth: inherit
+}
+
+params:query {
+  client_id: {{client_id}}
+  redirect_uri: urn:ietf:wg:oauth:2.0:oob
+  scope: read:self-assessment
+  response_type: code
+  ~testUserId: {{testUserId}}
+  ~testUserPassword: {{testUserPassword}}
+}

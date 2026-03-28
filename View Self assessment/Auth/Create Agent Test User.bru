@@ -1,0 +1,30 @@
+meta {
+  name: Create Agent Test User
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{url}}/create-test-user/agents
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{app_bearer_token}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "serviceNames": [
+      "agent-services"
+    ]
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("testUserId",res.body.userId)
+  bru.setEnvVar("testUserPassword",res.body.password)
+  
+}
