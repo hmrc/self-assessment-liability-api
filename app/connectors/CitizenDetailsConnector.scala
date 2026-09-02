@@ -47,7 +47,7 @@ class CitizenDetailsConnector @Inject() (client: HttpClientV2, appConfig: AppCon
           Future.failed(Downstream_Error)
         case response if response.status == 404 =>
           logger.info("Call to CID failed as no nino found for the utr provided")
-          Future.failed(Downstream_Error)
+          Future.failed(No_Data_Found_Error)
         case response =>
           logger.info(
             s"Call to CID failed with ${response.status} status and body ${response.body}"

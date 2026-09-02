@@ -86,7 +86,7 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
         result.json.as[ApiErrorResponses].message mustEqual INTERNAL_ERROR_RESPONSE
       }
 
-      "return 500 if call if no nino is found" in {
+      "return 404 if call if no nino is found" in {
         simulateGet(cidUrl, NOT_FOUND, "")
 
         val result =
@@ -97,8 +97,8 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
               .execute[HttpResponse], 5.seconds)
 
 
-        result.status mustEqual INTERNAL_SERVER_ERROR
-        result.json.as[ApiErrorResponses].message mustEqual INTERNAL_ERROR_RESPONSE
+        result.status mustEqual NOT_FOUND
+        result.json.as[ApiErrorResponses].message mustEqual NOT_FOUND_RESPONSE
       }
 
       "return 500 if call fails as an invalid json body returned" in {

@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.ServiceErrors.{Downstream_Error, Service_Currently_Unavailable_Error}
+import models.ServiceErrors.{Downstream_Error, No_Data_Found_Error, Service_Currently_Unavailable_Error}
 import play.api.Application
 import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -65,16 +65,16 @@ class CitizenDetailsConnectorSpec extends SpecBase with HttpWireMock {
       val result = connector.getNino("invalidUtr")
       result.failed.futureValue mustBe Downstream_Error
     }
-    "return Downstream_Error erro in case of a 404 response" in {
+    "return No_Data_Found_Error erro in case of a 404 response" in {
       simulateGet(serviceUrl("invalidUtr"), NOT_FOUND, "")
       val result = connector.getNino("invalidUtr")
-      result.failed.futureValue mustBe Downstream_Error
+      result.failed.futureValue mustBe No_Data_Found_Error
     }
-    "return Downstream_Error when JSON validation fails" in {
+    "return No_Data_Found_Error when JSON validation fails" in {
       val invalidJsonResponse = Json.obj("invalidField" -> "invalidValue").toString()
       simulateGet(serviceUrl("nino"), OK, invalidJsonResponse)
       val result = connector.getNino("invalidUtr")
-      result.failed.futureValue mustBe Downstream_Error
+      result.failed.futureValue mustBe No_Data_Found_Error
     }
   }
 }
