@@ -52,6 +52,7 @@ import services.SelfAssessmentService
 import shared.{HipResponseGenerator, SpecBase}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.constants.ErrorMessageConstansts.*
 
 import java.time.{LocalDate, Month}
 import scala.concurrent.{ExecutionContext, Future}
@@ -78,7 +79,8 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   val controller: SelfAssessmentHistoryController =
     new SelfAssessmentHistoryController(fakeAuthenticaAction, fakeValidateAction, cc, mockService)
   def request(utr: String, fromDate: LocalDate): Future[Result] = {
-    controller.getYourSelfAssessmentData("1234567890", Some(validDate.toString))(FakeRequest())
+    controller
+      .getYourSelfAssessmentData(utr, Some(fromDate.toString))(FakeRequest())
   }
 
   "SelfAssessmentHistoryController" should {
@@ -124,17 +126,25 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   "return bad request if a date with bad format is provided" in {
     when(mockService.viewAccountService(meq("1234567890"), any(), any())(any()))
       .thenReturn(Future.failed(Invalid_Start_Date_Error))
+
     val result = request("1234567890", validDate)
 
-    result.failed.futureValue mustEqual Invalid_Start_Date_Error
+    status(result) mustBe BAD_REQUEST
+    contentAsJson(result) mustBe Json.obj(
+      "message" -> BAD_REQUEST_RESPONSE
+    )
   }
 
-  "return Internal server error json validation on HIP response fails" in {
+  "return Internal server error if json validation on HIP response fails" in {
     when(mockService.viewAccountService(meq("1234567890"), any(), any())(any()))
       .thenReturn(Future.failed(Json_Validation_Error))
-    val result = request("1234567890", validDate)
-    result.failed.futureValue mustEqual Json_Validation_Error
 
+    val result = request("1234567890", validDate)
+
+    status(result) mustBe INTERNAL_SERVER_ERROR
+    contentAsJson(result) mustBe Json.obj(
+      "message" -> INTERNAL_ERROR_RESPONSE
+    )
   }
 
   "return not found if no data is found in HIP for the utr provided" in {
@@ -142,15 +152,22 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
       .thenReturn(Future.failed(No_Data_Found_Error))
 
     val result = request("1234567890", validDate)
-    result.failed.futureValue mustEqual No_Data_Found_Error
 
+    status(result) mustBe NOT_FOUND
+    contentAsJson(result) mustBe Json.obj(
+      "message" -> NOT_FOUND_RESPONSE
+    )
   }
-  "return service unavailable if call to HIP fails" in {
+
+  "return internal server error if call to HIP fails" in {
     when(mockService.viewAccountService(meq("1234567890"), any(), any())(any()))
       .thenReturn(Future.failed(Downstream_Error))
+
     val result = request("1234567890", validDate)
 
-    result.failed.futureValue mustEqual Downstream_Error
-
+    status(result) mustBe INTERNAL_SERVER_ERROR
+    contentAsJson(result) mustBe Json.obj(
+      "message" -> INTERNAL_ERROR_RESPONSE
+    )
   }
 }
