@@ -36,23 +36,22 @@ class SelfAssessmentHistoryController @Inject() (
     with Logging {
 
   def getYourSelfAssessmentData(
-                                 utr: String,
-                                 fromDate: Option[String]
-                               ): Action[AnyContent] =
-    (Action andThen validateRequest(utr) andThen authenticateUser).async {
-      implicit request =>
-        service
-          .viewAccountService(
-            utr,
-            request.requestPeriod.startDate,
-            request.requestPeriod.endDate
-          )
-          .map { selfAssessmentData =>
-            Ok(Json.toJson(selfAssessmentData))
-          }
-          .recover { case exception =>
-            ErrorResponseMapper.toResult(exception)
-          }
+      utr: String,
+      fromDate: Option[String]
+  ): Action[AnyContent] =
+    (Action andThen validateRequest(utr) andThen authenticateUser).async { implicit request =>
+      service
+        .viewAccountService(
+          utr,
+          request.requestPeriod.startDate,
+          request.requestPeriod.endDate
+        )
+        .map { selfAssessmentData =>
+          Ok(Json.toJson(selfAssessmentData))
+        }
+        .recover { case exception =>
+          ErrorResponseMapper.toResult(exception)
+        }
     }
 
 }
