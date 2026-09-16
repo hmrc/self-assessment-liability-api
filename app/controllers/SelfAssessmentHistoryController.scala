@@ -35,16 +35,23 @@ class SelfAssessmentHistoryController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def getYourSelfAssessmentData(utr: String, fromDate: Option[String]): Action[AnyContent] =
+  def getYourSelfAssessmentData(
+      utr: String,
+      fromDate: Option[String]
+  ): Action[AnyContent] =
     (Action andThen validateRequest(utr) andThen authenticateUser).async { implicit request =>
-      for {
-        selfAssessmentData <-
-          service.viewAccountService(
-            utr,
-            request.requestPeriod.startDate,
-            request.requestPeriod.endDate
-          )
-      } yield Ok(Json.toJson(selfAssessmentData))
+      service
+        .viewAccountService(
+          utr,
+          request.requestPeriod.startDate,
+          request.requestPeriod.endDate
+        )
+        .map { selfAssessmentData =>
+          Ok(Json.toJson(selfAssessmentData))
+        }
+        .recover { case exception =>
+          ErrorResponseMapper.toResult(exception)
+        }
     }
 
 }
