@@ -134,7 +134,7 @@ class SelfAssessmentHistoryAuditSpec
         .toOption mustBe None
     }
 
-    "audit statusCode and responseMessage instead of failedRequestReason when a downstream call fails" in {
+    "audit a meaningful failedRequestReason when a downstream call fails" in {
 
       server.stubFor(
         post(urlEqualTo("/write/audit"))
@@ -213,21 +213,12 @@ class SelfAssessmentHistoryAuditSpec
             fail("No RequestReceived audit event was found")
           }
 
-      println(
-        s"Downstream failure RequestReceived audit:\n${Json.prettyPrint(requestReceivedAudit)}"
-      )
-
       val detail =
         requestReceivedAudit \ "detail"
 
-      (detail \ "statusCode")
-        .asOpt[String] mustBe Some("500")
-
-      (detail \ "responseMessage")
-        .asOpt[String] must not be empty
-
       (detail \ "failedRequestReason")
-        .toOption mustBe None
+        .asOpt[String] mustBe Some("Downstream error")
+
     }
   }
 }
