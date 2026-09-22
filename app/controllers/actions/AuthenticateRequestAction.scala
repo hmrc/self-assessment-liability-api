@@ -17,6 +17,7 @@
 package controllers.actions
 
 import config.AppConfig
+import controllers.ErrorResponseMapper
 import models.RequestWithUtr
 import models.ServiceErrors.Unauthorised_Error
 import play.api.Logging
@@ -50,10 +51,15 @@ class AuthenticateRequestAction @Inject() (
       .retrieve(affinityGroup and confidenceLevel) {
         case Some(Individual) ~ userConfidence =>
           dealWithSelfAssessmentIndividual(userConfidence, request)
+
         case Some(Organisation) ~ _ =>
           dealWithNonAgentAffinity(request)
+
         case Some(Agent) ~ _ =>
           authenticateAgent(request)
+      }
+      .recover { case exception =>
+        Some(ErrorResponseMapper.toResult(exception))
       }
   }
 
