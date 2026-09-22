@@ -38,8 +38,8 @@ class ValidateRequestAction @Inject() ()(implicit val ec: ExecutionContext) exte
       override protected def executionContext: ExecutionContext = ec
 
       override protected def refine[A](
-                                        request: Request[A]
-                                      ): Future[Either[Result, RequestWithUtr[A]]] = {
+          request: Request[A]
+      ): Future[Either[Result, RequestWithUtr[A]]] = {
 
         if (isValidUtr(utr)) {
           val requestPeriod = getPastTwoUkTaxYears()
@@ -51,11 +51,10 @@ class ValidateRequestAction @Inject() ()(implicit val ec: ExecutionContext) exte
                 Right(
                   RequestWithUtr(
                     utr = utr,
-                    requestPeriod =
-                      RequestPeriod(
-                        startDate = requestPeriod._1,
-                        endDate = requestPeriod._2
-                      ),
+                    requestPeriod = RequestPeriod(
+                      startDate = requestPeriod._1,
+                      endDate = requestPeriod._2
+                    ),
                     request = request
                   )
                 )
@@ -66,11 +65,10 @@ class ValidateRequestAction @Inject() ()(implicit val ec: ExecutionContext) exte
                   Right(
                     RequestWithUtr(
                       utr = utr,
-                      requestPeriod =
-                        RequestPeriod(
-                          startDate = date,
-                          endDate = requestPeriod._2
-                        ),
+                      requestPeriod = RequestPeriod(
+                        startDate = date,
+                        endDate = requestPeriod._2
+                      ),
                       request = request
                     )
                   )
@@ -87,8 +85,8 @@ class ValidateRequestAction @Inject() ()(implicit val ec: ExecutionContext) exte
       }
 
       private def validateAndParseDate(
-                                        dateInStringFormat: String
-                                      ): Future[Either[Result, LocalDate]] = {
+          dateInStringFormat: String
+      ): Future[Either[Result, LocalDate]] = {
         Future
           .fromTry(Try(LocalDate.parse(dateInStringFormat)))
           .map { parsedDate =>

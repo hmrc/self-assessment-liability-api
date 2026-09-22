@@ -30,10 +30,10 @@ import scala.concurrent.Future
 class GlobalErrorHandler extends HttpErrorHandler with Logging {
 
   override def onClientError(
-                              request: RequestHeader,
-                              statusCode: Int,
-                              message: String
-                            ): Future[Result] = {
+      request: RequestHeader,
+      statusCode: Int,
+      message: String
+  ): Future[Result] = {
     statusCode match
       case 400 =>
         Future.successful(
@@ -52,9 +52,9 @@ class GlobalErrorHandler extends HttpErrorHandler with Logging {
   }
 
   override def onServerError(
-                              request: RequestHeader,
-                              exception: Throwable
-                            ): Future[Result] =
+      request: RequestHeader,
+      exception: Throwable
+  ): Future[Result] =
     Future.successful(
       ErrorResponseMapper.toResult(exception)
     )

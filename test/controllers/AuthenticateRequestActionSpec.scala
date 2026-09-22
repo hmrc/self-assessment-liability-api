@@ -18,10 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.AuthenticateRequestAction
-import models.ServiceErrors.{
-  Downstream_Error,
-  Service_Currently_Unavailable_Error
-}
+import models.ServiceErrors.{Downstream_Error, Service_Currently_Unavailable_Error}
 import models.{RequestPeriod, RequestWithUtr}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
@@ -61,7 +58,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
     RequestWithUtr("utr", RequestPeriod(now, now), fakeRequest)
 
   class Harness(service: SelfAssessmentService)
-    extends AuthenticateRequestAction(service, authConnector)(ec, appConfig) {
+      extends AuthenticateRequestAction(service, authConnector)(ec, appConfig) {
 
     def callFilter[A](request: RequestWithUtr[A]): Future[Option[Result]] =
       filter(requestWithUtr)
@@ -114,7 +111,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Individual), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
 
       when(
         authConnector
@@ -135,7 +132,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new~(Some(Individual), lowConfidence)))
+      .thenReturn(Future.successful(new ~(Some(Individual), lowConfidence)))
 
     val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
@@ -149,7 +146,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new~(Some(Individual), minimumConfidence)))
+      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
 
     when(
       authConnector
@@ -177,7 +174,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new~(Some(Individual), minimumConfidence)))
+      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
 
     when(
       authConnector
@@ -204,7 +201,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new~(Some(Individual), minimumConfidence)))
+      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
 
     when(
       authConnector
@@ -227,7 +224,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new~(Some(Individual), minimumConfidence)))
+      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
 
     when(
       authConnector
@@ -252,7 +249,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Organisation), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
 
       when(
         authConnector
@@ -278,7 +275,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Organisation), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
 
       when(
         authConnector
@@ -296,7 +293,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Organisation), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
 
       when(
         authConnector
@@ -323,7 +320,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Organisation), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
 
       when(
         authConnector
@@ -345,7 +342,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Organisation), minimumConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
 
       when(
         authConnector
@@ -370,7 +367,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Agent), lowConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
 
       when(
         authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
@@ -398,7 +395,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Agent), lowConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
 
       when(
         authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
@@ -437,7 +434,7 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new~(Some(Agent), lowConfidence)))
+        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
 
       when(
         authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
@@ -470,69 +467,68 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       resultStatus(result) mustBe UNAUTHORIZED
     }
 
-      "return Service_Currently_Unavailable_Error if call to fetch mtd fails due to services being down" in {
-        when(
-          authConnector.authorise(
-            any(),
-            eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
-          )(any(), any())
+    "return Service_Currently_Unavailable_Error if call to fetch mtd fails due to services being down" in {
+      when(
+        authConnector.authorise(
+          any(),
+          eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
+        )(any(), any())
+      )
+        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+
+      when(
+        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
+          any(),
+          any()
         )
-          .thenReturn(Future.successful(new~(Some(Agent), lowConfidence)))
+      )
+        .thenReturn(Future.successful(()))
 
-        when(
-          authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-            any(),
-            any()
-          )
+      when(
+        authConnector.authorise(
+          eqTo(delegatedLegacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
+      )
+        .thenReturn(Future.failed(InsufficientEnrolments()))
+
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+        .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
+      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      resultStatus(result) mustBe SERVICE_UNAVAILABLE
+    }
+
+    "return the error if call to fetch mtd fails with Downstream_Error" in {
+      when(
+        authConnector.authorise(
+          any(),
+          eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
+        )(any(), any())
+      )
+        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+
+      when(
+        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
+          any(),
+          any()
         )
-          .thenReturn(Future.successful(()))
+      )
+        .thenReturn(Future.successful(()))
 
-        when(
-          authConnector.authorise(
-            eqTo(delegatedLegacySaEnrolment("utr")),
-            eqTo(EmptyRetrieval)
-          )(any(), any())
-        )
-          .thenReturn(Future.failed(InsufficientEnrolments()))
+      when(
+        authConnector.authorise(
+          eqTo(delegatedLegacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
+      )
+        .thenReturn(Future.failed(InsufficientEnrolments()))
 
-        when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-          .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
-        val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+        .thenReturn(Future.failed(Downstream_Error))
+      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-        resultStatus(result) mustBe SERVICE_UNAVAILABLE
-      }
-
-      "return the error if call to fetch mtd fails with Downstream_Error" in {
-        when(
-          authConnector.authorise(
-            any(),
-            eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
-          )(any(), any())
-        )
-          .thenReturn(Future.successful(new~(Some(Agent), lowConfidence)))
-
-        when(
-          authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-            any(),
-            any()
-          )
-        )
-          .thenReturn(Future.successful(()))
-
-        when(
-          authConnector.authorise(
-            eqTo(delegatedLegacySaEnrolment("utr")),
-            eqTo(EmptyRetrieval)
-          )(any(), any())
-        )
-          .thenReturn(Future.failed(InsufficientEnrolments()))
-
-        when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-          .thenReturn(Future.failed(Downstream_Error))
-        val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
-
-        resultStatus(result) mustBe INTERNAL_SERVER_ERROR
-      }
+      resultStatus(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
-
+}
