@@ -24,14 +24,14 @@ class ServiceErrorsSpec extends AnyWordSpec with Matchers {
 
   "ServiceErrors" should {
 
-    "have no exception message by default" in {
-      Downstream_Error.getMessage mustBe null
-      Service_Currently_Unavailable_Error.getMessage mustBe null
-      Json_Validation_Error.getMessage mustBe null
-      No_Data_Found_Error.getMessage mustBe null
-      Invalid_Start_Date_Error.getMessage mustBe null
-      Invalid_Utr_Error.getMessage mustBe null
-      Unauthorised_Error.getMessage mustBe null
+    "have meaningful exception messages" in {
+      Downstream_Error.getMessage mustBe "Downstream error"
+      Service_Currently_Unavailable_Error.getMessage mustBe "Service currently unavailable"
+      Json_Validation_Error.getMessage mustBe "JSON validation error"
+      No_Data_Found_Error.getMessage mustBe "No data found"
+      Invalid_Start_Date_Error.getMessage mustBe "Invalid start date"
+      Invalid_Utr_Error.getMessage mustBe "Invalid UTR"
+      Unauthorised_Error.getMessage mustBe "Unauthorised"
     }
 
     "retain their readable toString values" in {

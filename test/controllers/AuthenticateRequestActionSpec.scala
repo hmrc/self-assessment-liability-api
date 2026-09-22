@@ -16,9 +16,14 @@
 
 package controllers
 
+import play.api.test.Helpers.*
 import config.AppConfig
 import controllers.actions.AuthenticateRequestAction
-import models.ServiceErrors.{Downstream_Error, Service_Currently_Unavailable_Error}
+import models.ServiceErrors.{
+  Downstream_Error,
+  Service_Currently_Unavailable_Error,
+  Unauthorised_Error
+}
 import models.{RequestPeriod, RequestWithUtr}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
@@ -26,7 +31,6 @@ import org.scalatest.matchers.should.Matchers.should
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.{AnyContent, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.*
 import services.SelfAssessmentService
 import shared.{HttpWireMock, SpecBase}
 import uk.gov.hmrc.auth.core.*
@@ -64,28 +68,25 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       filter(requestWithUtr)
   }
 
-  private def resultStatus(result: Future[Option[Result]]): Int =
-    result.futureValue
-      .map(_.header.status)
-      .getOrElse(fail("Expected an HTTP Result"))
-
   "AuthenticateRequestAction" when {
     "no auth token" should {
-      "return BadRequest" in {
+      "propagate NoActiveSession" in {
         val sessionFailed = new NoActiveSession("No active session") {}
+
         when(authConnector.authorise(any(), any())(any(), any()))
           .thenReturn(Future.failed(sessionFailed))
 
-        val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+        val result =
+          new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-        resultStatus(result) mustBe BAD_REQUEST
-
+        result.failed.futureValue mustBe sessionFailed
       }
     }
 
     "auth down" should {
-      "return service unavailable if auth is down" in {
+      "propagate the auth failure" in {
         val error = new RuntimeException("Auth service down")
+
         when(
           authConnector.authorise(
             any(),
@@ -94,12 +95,12 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         )
           .thenReturn(Future.failed(error))
 
-        val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+        val result =
+          new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-        resultStatus(result) mustBe SERVICE_UNAVAILABLE
+        result.failed.futureValue mustBe error
       }
     }
-
   }
 
   "Individual Affinity" should {
@@ -111,32 +112,48 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Individual), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
-      val result = await(new Harness(selfAssessmentService).callFilter(requestWithUtr))
+      val result =
+        await(
+          new Harness(selfAssessmentService)
+            .callFilter(requestWithUtr)
+        )
 
       result mustBe None
     }
   }
 
-  "return Unauthorized if confidence level is below 250" in {
+  "propagate Unauthorised_Error if confidence level is below 250" in {
     when(
       authConnector.authorise(
         any(),
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(Some(Individual), lowConfidence)))
+      .thenReturn(
+        Future.successful(
+          new ~(Some(Individual), lowConfidence)
+        )
+      )
 
-    val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+    val result =
+      new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-    resultStatus(result) mustBe UNAUTHORIZED
+    result.failed.futureValue mustBe Unauthorised_Error
   }
 
   "return ok if they meet the minimum confidence threshold with an mtd enrolment" in {
@@ -146,52 +163,84 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
+      .thenReturn(
+        Future.successful(
+          new ~(Some(Individual), minimumConfidence)
+        )
+      )
 
     when(
       authConnector
-        .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+        .authorise(
+          eqTo(legacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+    when(
+      selfAssessmentService
+        .getMtdIdFromUtr(eqTo("utr"))(any())
+    )
       .thenReturn(Future.successful("mtdId"))
 
     when(
-      authConnector.authorise(eqTo(mtdSaEnrolment("mtdId")), eqTo(EmptyRetrieval))(any(), any())
+      authConnector.authorise(
+        eqTo(mtdSaEnrolment("mtdId")),
+        eqTo(EmptyRetrieval)
+      )(any(), any())
     )
       .thenReturn(Future.successful(()))
 
-    val result = await(new Harness(selfAssessmentService).callFilter(requestWithUtr))
+    val result =
+      await(
+        new Harness(selfAssessmentService)
+          .callFilter(requestWithUtr)
+      )
 
     result mustBe None
   }
 
-  "return AuthorisationException if they do not have any of the accepted enrolments" in {
+  "propagate AuthorisationException if they do not have any of the accepted enrolments" in {
     when(
       authConnector.authorise(
         any(),
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
+      .thenReturn(
+        Future.successful(
+          new ~(Some(Individual), minimumConfidence)
+        )
+      )
 
     when(
       authConnector
-        .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
-    ).thenReturn(Future.failed(InsufficientEnrolments()))
-
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-      .thenReturn(Future.successful("mtdId"))
-
-    when(
-      authConnector.authorise(eqTo(mtdSaEnrolment("mtdId")), eqTo(EmptyRetrieval))(any(), any())
+        .authorise(
+          eqTo(legacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+    when(
+      selfAssessmentService
+        .getMtdIdFromUtr(eqTo("utr"))(any())
+    )
+      .thenReturn(Future.successful("mtdId"))
 
-    resultStatus(result) mustBe UNAUTHORIZED
+    when(
+      authConnector.authorise(
+        eqTo(mtdSaEnrolment("mtdId")),
+        eqTo(EmptyRetrieval)
+      )(any(), any())
+    )
+      .thenReturn(Future.failed(InsufficientEnrolments()))
+
+    val result =
+      new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+    result.failed.futureValue mustBe a[InsufficientEnrolments]
   }
 
   "return the failed future if call to fetch mtd id fails due to service being unavailable" in {
@@ -201,20 +250,33 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
+      .thenReturn(
+        Future.successful(
+          new ~(Some(Individual), minimumConfidence)
+        )
+      )
 
     when(
       authConnector
-        .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+        .authorise(
+          eqTo(legacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-      .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
+    when(
+      selfAssessmentService
+        .getMtdIdFromUtr(eqTo("utr"))(any())
+    )
+      .thenReturn(
+        Future.failed(Service_Currently_Unavailable_Error)
+      )
 
-    val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+    val result =
+      new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-    resultStatus(result) mustBe SERVICE_UNAVAILABLE
+    result.failed.futureValue mustBe Service_Currently_Unavailable_Error
   }
 
   "return Downstream_Error if call to fetch mtd id fails" in {
@@ -224,24 +286,35 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
       )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(Some(Individual), minimumConfidence)))
+      .thenReturn(
+        Future.successful(
+          new ~(Some(Individual), minimumConfidence)
+        )
+      )
 
     when(
       authConnector
-        .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+        .authorise(
+          eqTo(legacySaEnrolment("utr")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
     )
       .thenReturn(Future.failed(InsufficientEnrolments()))
 
-    when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+    when(
+      selfAssessmentService
+        .getMtdIdFromUtr(eqTo("utr"))(any())
+    )
       .thenReturn(Future.failed(Downstream_Error))
 
-    val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+    val result =
+      new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-    resultStatus(result) mustBe INTERNAL_SERVER_ERROR
-
+    result.failed.futureValue mustBe Downstream_Error
   }
 
   "Organisation Affinity" should {
+
     "return ok for a valid mtd enrolment" in {
       when(
         authConnector.authorise(
@@ -249,22 +322,38 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Organisation), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
         .thenReturn(Future.successful("mtdId"))
 
       when(
-        authConnector.authorise(eqTo(mtdSaEnrolment("mtdId")), eqTo(EmptyRetrieval))(any(), any())
+        authConnector.authorise(
+          eqTo(mtdSaEnrolment("mtdId")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
       result.futureValue mustBe None
     }
 
@@ -275,42 +364,67 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Organisation), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.successful(()))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
       result.futureValue mustBe None
     }
 
-    "return Unauthorized if they do not have any of the accepted enrolments" in {
+    "propagate AuthorisationException if they do not have any of the accepted enrolments" in {
       when(
         authConnector.authorise(
           any(),
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Organisation), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-        .thenReturn(Future.successful("mtdId"))
       when(
-        authConnector.authorise(eqTo(mtdSaEnrolment("mtdId")), eqTo(EmptyRetrieval))(any(), any())
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
+        .thenReturn(Future.successful("mtdId"))
+
+      when(
+        authConnector.authorise(
+          eqTo(mtdSaEnrolment("mtdId")),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-      resultStatus(result) mustBe UNAUTHORIZED
+      result.failed.futureValue mustBe a[InsufficientEnrolments]
     }
 
     "return error if call to fetch mtd id fails with Service_Currently_Unavailable_Error" in {
@@ -320,19 +434,33 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Organisation), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-        .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
+        .thenReturn(
+          Future.failed(Service_Currently_Unavailable_Error)
+        )
 
-      resultStatus(result) mustBe SERVICE_UNAVAILABLE
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      result.failed.futureValue mustBe Service_Currently_Unavailable_Error
     }
 
     "return error if call to fetch mtd id returns Downstream_Error" in {
@@ -342,19 +470,31 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Organisation), minimumConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Organisation), minimumConfidence)
+          )
+        )
 
       when(
         authConnector
-          .authorise(eqTo(legacySaEnrolment("utr")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(
+            eqTo(legacySaEnrolment("utr")),
+            eqTo(EmptyRetrieval)
+          )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
         .thenReturn(Future.failed(Downstream_Error))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-      resultStatus(result) mustBe INTERNAL_SERVER_ERROR
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      result.failed.futureValue mustBe Downstream_Error
     }
   }
 
@@ -367,13 +507,17 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Agent), lowConfidence)
+          )
+        )
 
       when(
-        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-          any(),
-          any()
-        )
+        authConnector.authorise(
+          eqTo(principleAgentEnrolments),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
@@ -384,7 +528,10 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         )(any(), any())
       )
         .thenReturn(Future.successful(()))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
       result.futureValue mustBe None
     }
 
@@ -395,13 +542,17 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Agent), lowConfidence)
+          )
+        )
 
       when(
-        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-          any(),
-          any()
-        )
+        authConnector.authorise(
+          eqTo(principleAgentEnrolments),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
@@ -413,7 +564,10 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
         .thenReturn(Future.successful("mtdId"))
 
       when(
@@ -423,24 +577,31 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         )(any(), any())
       )
         .thenReturn(Future.successful(()))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
       result.futureValue mustBe None
     }
 
-    "return Unauthorized if agent/client relationship is not established via the utr provided" in {
+    "propagate Unauthorised_Error if agent/client relationship is not established via the utr provided" in {
       when(
         authConnector.authorise(
           any(),
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Agent), lowConfidence)
+          )
+        )
 
       when(
-        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-          any(),
-          any()
-        )
+        authConnector.authorise(
+          eqTo(principleAgentEnrolments),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
@@ -452,7 +613,10 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
         .thenReturn(Future.successful("mtdId"))
 
       when(
@@ -462,9 +626,11 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         )(any(), any())
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-      resultStatus(result) mustBe UNAUTHORIZED
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      result.failed.futureValue mustBe Unauthorised_Error
     }
 
     "return Service_Currently_Unavailable_Error if call to fetch mtd fails due to services being down" in {
@@ -474,13 +640,17 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Agent), lowConfidence)
+          )
+        )
 
       when(
-        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-          any(),
-          any()
-        )
+        authConnector.authorise(
+          eqTo(principleAgentEnrolments),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
@@ -492,11 +662,18 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
-        .thenReturn(Future.failed(Service_Currently_Unavailable_Error))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
+        .thenReturn(
+          Future.failed(Service_Currently_Unavailable_Error)
+        )
 
-      resultStatus(result) mustBe SERVICE_UNAVAILABLE
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      result.failed.futureValue mustBe Service_Currently_Unavailable_Error
     }
 
     "return the error if call to fetch mtd fails with Downstream_Error" in {
@@ -506,13 +683,17 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
           eqTo(Retrievals.affinityGroup and Retrievals.confidenceLevel)
         )(any(), any())
       )
-        .thenReturn(Future.successful(new ~(Some(Agent), lowConfidence)))
+        .thenReturn(
+          Future.successful(
+            new ~(Some(Agent), lowConfidence)
+          )
+        )
 
       when(
-        authConnector.authorise(eqTo(principleAgentEnrolments), eqTo(EmptyRetrieval))(
-          any(),
-          any()
-        )
+        authConnector.authorise(
+          eqTo(principleAgentEnrolments),
+          eqTo(EmptyRetrieval)
+        )(any(), any())
       )
         .thenReturn(Future.successful(()))
 
@@ -524,11 +705,16 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
       )
         .thenReturn(Future.failed(InsufficientEnrolments()))
 
-      when(selfAssessmentService.getMtdIdFromUtr(eqTo("utr"))(any()))
+      when(
+        selfAssessmentService
+          .getMtdIdFromUtr(eqTo("utr"))(any())
+      )
         .thenReturn(Future.failed(Downstream_Error))
-      val result = new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
-      resultStatus(result) mustBe INTERNAL_SERVER_ERROR
+      val result =
+        new Harness(selfAssessmentService).callFilter(requestWithUtr)
+
+      result.failed.futureValue mustBe Downstream_Error
     }
   }
 }
