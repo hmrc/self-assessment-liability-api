@@ -16,16 +16,26 @@
 
 package models
 
-sealed abstract class ServiceErrors extends Throwable {
-  override def toString: String = getClass.getSimpleName.replace("$", "")
+sealed abstract class ServiceErrors(message: String) extends Exception(message) {
+
+  override def toString: String =
+    getClass.getSimpleName.replace("$", "")
 }
 
 object ServiceErrors {
-  case object Downstream_Error extends ServiceErrors
-  case object Service_Currently_Unavailable_Error extends ServiceErrors
-  case object Json_Validation_Error extends ServiceErrors
-  case object No_Data_Found_Error extends ServiceErrors
-  case object Invalid_Start_Date_Error extends ServiceErrors
-  case object Invalid_Utr_Error extends ServiceErrors
-  case object Unauthorised_Error extends ServiceErrors
+
+  case object Downstream_Error extends ServiceErrors("Downstream error")
+
+  case object Service_Currently_Unavailable_Error
+      extends ServiceErrors("Service currently unavailable")
+
+  case object Json_Validation_Error extends ServiceErrors("JSON validation error")
+
+  case object No_Data_Found_Error extends ServiceErrors("No data found")
+
+  case object Invalid_Start_Date_Error extends ServiceErrors("Invalid start date")
+
+  case object Invalid_Utr_Error extends ServiceErrors("Invalid UTR")
+
+  case object Unauthorised_Error extends ServiceErrors("Unauthorised")
 }

@@ -17,12 +17,13 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import models.ServiceErrors.{Invalid_Start_Date_Error, Invalid_Utr_Error}
-import models.{RequestPeriod, RequestWithUtr}
+import models.{ApiErrorResponses, RequestPeriod, RequestWithUtr}
 import play.api.Logging
 import play.api.mvc.*
+import play.api.mvc.Results.BadRequest
 import utils.UkTaxYears.{getPastTwoUkTaxYears, isInvalidDate}
 import utils.UtrValidator.isValidUtr
+import utils.constants.ErrorMessageConstansts.BAD_REQUEST_RESPONSE
 
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
@@ -31,55 +32,80 @@ import scala.util.Try
 
 class ValidateRequestAction @Inject() ()(implicit val ec: ExecutionContext) extends Logging {
 
-  def apply(utr: String): ActionTransformer[Request, RequestWithUtr] =
-    new ActionTransformer[Request, RequestWithUtr] {
+  def apply(utr: String): ActionRefiner[Request, RequestWithUtr] =
+    new ActionRefiner[Request, RequestWithUtr] {
 
       override protected def executionContext: ExecutionContext = ec
 
-      override protected def transform[A](request: Request[A]): Future[RequestWithUtr[A]] = {
+      override protected def refine[A](
+          request: Request[A]
+      ): Future[Either[Result, RequestWithUtr[A]]] = {
 
         if (isValidUtr(utr)) {
           val requestPeriod = getPastTwoUkTaxYears()
+
           request
             .getQueryString("fromDate")
             .fold(
               Future.successful(
-                RequestWithUtr(
-                  utr = utr,
-                  requestPeriod =
-                    RequestPeriod(startDate = requestPeriod._1, endDate = requestPeriod._2),
-                  request = request
+                Right(
+                  RequestWithUtr(
+                    utr = utr,
+                    requestPeriod = RequestPeriod(
+                      startDate = requestPeriod._1,
+                      endDate = requestPeriod._2
+                    ),
+                    request = request
+                  )
                 )
               )
             ) { dateInStringFormat =>
-              validateAndParseDate(dateInStringFormat).map(date =>
-                RequestWithUtr(
-                  utr = utr,
-                  requestPeriod = RequestPeriod(startDate = date, endDate = requestPeriod._2),
-                  request = request
-                )
-              )
+              validateAndParseDate(dateInStringFormat).map {
+                case Right(date) =>
+                  Right(
+                    RequestWithUtr(
+                      utr = utr,
+                      requestPeriod = RequestPeriod(
+                        startDate = date,
+                        endDate = requestPeriod._2
+                      ),
+                      request = request
+                    )
+                  )
+
+                case Left(result) =>
+                  Left(result)
+              }
             }
         } else {
-          Future.failed(Invalid_Utr_Error)
+          Future.successful(
+            Left(badRequest)
+          )
         }
       }
-      private def validateAndParseDate(dateInStringFormat: String): Future[LocalDate] = {
+
+      private def validateAndParseDate(
+          dateInStringFormat: String
+      ): Future[Either[Result, LocalDate]] = {
         Future
           .fromTry(Try(LocalDate.parse(dateInStringFormat)))
-          .flatMap { parsedDate =>
+          .map { parsedDate =>
             if (isInvalidDate(dateToValidate = parsedDate)) {
               logger.info(s"Rejecting $dateInStringFormat as it is invalid")
-              Future.failed(Invalid_Start_Date_Error)
+              Left(badRequest)
             } else {
-              Future.successful(parsedDate)
+              Right(parsedDate)
             }
           }
-          .recoverWith { case _: DateTimeParseException =>
+          .recover { case _: DateTimeParseException =>
             logger.info(s"parsing of $dateInStringFormat failed")
-            Future.failed(Invalid_Start_Date_Error)
+            Left(badRequest)
           }
       }
-    }
 
+      private def badRequest: Result =
+        BadRequest(
+          ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson
+        )
+    }
 }
