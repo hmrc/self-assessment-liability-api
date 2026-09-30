@@ -46,15 +46,14 @@ class AuthenticateRequestAction @Inject() (
 
   override protected def filter[A](request: RequestWithUtr[A]): Future[Option[Result]] = {
     implicit val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-    authorised()
-      .retrieve(affinityGroup and confidenceLevel) {
-        case Some(Individual) ~ userConfidence =>
-          dealWithSelfAssessmentIndividual(userConfidence, request)
-        case Some(Organisation) ~ _ =>
-          dealWithNonAgentAffinity(request)
-        case Some(Agent) ~ _ =>
-          authenticateAgent(request)
-      }
+    authorised().retrieve(affinityGroup and confidenceLevel) {
+      case Some(Individual) ~ userConfidence =>
+        dealWithSelfAssessmentIndividual(userConfidence, request)
+      case Some(Organisation) ~ _ =>
+        dealWithNonAgentAffinity(request)
+      case Some(Agent) ~ _ =>
+        authenticateAgent(request)
+    }
   }
 
   private def dealWithSelfAssessmentIndividual[A](
