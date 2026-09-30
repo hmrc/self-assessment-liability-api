@@ -28,23 +28,18 @@ object ErrorResponseMapper {
   def toResult(exception: Throwable): Result =
     exception match {
       case Downstream_Error | Json_Validation_Error | _: IllegalArgumentException =>
-        InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson
-        )
+        InternalServerError(ApiErrorResponses(INTERNAL_ERROR_RESPONSE).asJson)
 
       case No_Data_Found_Error =>
-        NotFound(ApiErrorResponses(NOT_FOUND_RESPONSE).asJson
-        )
+        NotFound(ApiErrorResponses(NOT_FOUND_RESPONSE).asJson)
 
       case Invalid_Start_Date_Error | Invalid_Utr_Error | _: NoActiveSession =>
-        BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson
-        )
+        BadRequest(ApiErrorResponses(BAD_REQUEST_RESPONSE).asJson)
 
       case Unauthorised_Error | _: AuthorisationException =>
-        Unauthorized(ApiErrorResponses(UNAUTHORISED_RESPONSE).asJson
-        )
+        Unauthorized(ApiErrorResponses(UNAUTHORISED_RESPONSE).asJson)
 
       case _ =>
-        ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson
-        )
+        ServiceUnavailable(ApiErrorResponses(SERVICE_UNAVAILABLE_RESPONSE).asJson)
     }
 }

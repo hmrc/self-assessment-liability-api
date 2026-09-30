@@ -36,9 +36,9 @@ class SelfAssessmentHistoryController @Inject() (
     with Logging {
 
   def getYourSelfAssessmentData(
-                                 utr: String,
-                                 fromDate: Option[String]
-                               ): Action[AnyContent] =
+      utr: String,
+      fromDate: Option[String]
+  ): Action[AnyContent] =
     (Action andThen validateRequest(utr) andThen authenticateUser).async { implicit request =>
       service
         .viewAccountService(

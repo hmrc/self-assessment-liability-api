@@ -26,7 +26,8 @@ object ServiceErrors {
 
   case object Downstream_Error extends ServiceErrors("Downstream error")
 
-  case object Service_Currently_Unavailable_Error extends ServiceErrors("Service currently unavailable")
+  case object Service_Currently_Unavailable_Error
+      extends ServiceErrors("Service currently unavailable")
 
   case object Json_Validation_Error extends ServiceErrors("JSON validation error")
 
