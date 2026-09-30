@@ -67,8 +67,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   val bodyParser: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
   implicit val appConfig: AppConfig = mock[AppConfig]
   val fakeValidateAction: ValidateRequestAction = new ValidateRequestAction()
-  val fakeAuthenticaAction: AuthenticateRequestAction =
-    new AuthenticateRequestAction(mockService, authConnector) {
+  val fakeAuthenticaAction: AuthenticateRequestAction = new AuthenticateRequestAction(mockService, authConnector) {
       override def filter[A](request: RequestWithUtr[A]): Future[Option[Result]] = {
         Future.successful(None)
       }
@@ -79,15 +78,13 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   val controller: SelfAssessmentHistoryController =
     new SelfAssessmentHistoryController(fakeAuthenticaAction, fakeValidateAction, cc, mockService)
   def request(utr: String, fromDate: LocalDate): Future[Result] = {
-    controller
-      .getYourSelfAssessmentData(utr, Some(fromDate.toString))(FakeRequest())
+    controller.getYourSelfAssessmentData(utr, Some(fromDate.toString))(FakeRequest())
   }
 
   "SelfAssessmentHistoryController" should {
     "return OK with success message" in {
       forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
-        when(
-          mockService.viewAccountService(
+        when(mockService.viewAccountService(
             any[String],
             any[LocalDate],
             any[LocalDate]
@@ -130,9 +127,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
     val result = request("1234567890", validDate)
 
     status(result) mustBe BAD_REQUEST
-    contentAsJson(result) mustBe Json.obj(
-      "message" -> BAD_REQUEST_RESPONSE
-    )
+    contentAsJson(result) mustBe Json.obj("message" -> BAD_REQUEST_RESPONSE)
   }
 
   "return Internal server error if json validation on HIP response fails" in {
@@ -142,9 +137,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
     val result = request("1234567890", validDate)
 
     status(result) mustBe INTERNAL_SERVER_ERROR
-    contentAsJson(result) mustBe Json.obj(
-      "message" -> INTERNAL_ERROR_RESPONSE
-    )
+    contentAsJson(result) mustBe Json.obj("message" -> INTERNAL_ERROR_RESPONSE)
   }
 
   "return not found if no data is found in HIP for the utr provided" in {
@@ -154,9 +147,7 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
     val result = request("1234567890", validDate)
 
     status(result) mustBe NOT_FOUND
-    contentAsJson(result) mustBe Json.obj(
-      "message" -> NOT_FOUND_RESPONSE
-    )
+    contentAsJson(result) mustBe Json.obj("message" -> NOT_FOUND_RESPONSE)
   }
 
   "return internal server error if call to HIP fails" in {
@@ -166,8 +157,6 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
     val result = request("1234567890", validDate)
 
     status(result) mustBe INTERNAL_SERVER_ERROR
-    contentAsJson(result) mustBe Json.obj(
-      "message" -> INTERNAL_ERROR_RESPONSE
-    )
+    contentAsJson(result) mustBe Json.obj("message" -> INTERNAL_ERROR_RESPONSE)
   }
 }

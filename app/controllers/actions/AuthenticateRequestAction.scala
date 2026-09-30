@@ -46,15 +46,11 @@ class AuthenticateRequestAction @Inject() (
 
   override protected def filter[A](request: RequestWithUtr[A]): Future[Option[Result]] = {
     implicit val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-    authorised()
-      .retrieve(affinityGroup and confidenceLevel) {
+    authorised().retrieve(affinityGroup and confidenceLevel) {
         case Some(Individual) ~ userConfidence =>
           dealWithSelfAssessmentIndividual(userConfidence, request)
-
         case Some(Organisation) ~ _ =>
           dealWithNonAgentAffinity(request)
-
         case Some(Agent) ~ _ =>
           authenticateAgent(request)
       }
@@ -64,8 +60,7 @@ class AuthenticateRequestAction @Inject() (
       confidenceLevel: ConfidenceLevel,
       request: RequestWithUtr[A]
   )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
-    if (confidenceLevel < config.confidenceLevel) {
-      logger.info(
+    if (confidenceLevel < config.confidenceLevel) {logger.info(
         s"Authentication of individual failed as the minimum confidence level of ${config.confidenceLevel} not reached"
       )
       Future.failed(Unauthorised_Error)

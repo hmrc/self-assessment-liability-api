@@ -16,14 +16,9 @@
 
 package controllers
 
-import com.github.tomakehurst.wiremock.client.WireMock.{
-  aResponse,
-  get,
-  post,
-  postRequestedFor,
-  urlEqualTo
-}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, postRequestedFor, urlEqualTo}
 import org.scalatest.concurrent.Eventually
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -31,6 +26,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import utils.IntegrationSpecBase
+
+import scala.concurrent.Await
 
 class SelfAssessmentHistoryAuditSpec
   extends IntegrationSpecBase
@@ -77,10 +74,7 @@ class SelfAssessmentHistoryAuditSpec
       val result =
         route(app, request).get
 
-      result
-        .map(_ => ())
-        .recover { case _ => () }
-        .futureValue
+      Await.ready(result, 5.seconds)
 
       eventually {
         server.verify(
@@ -173,10 +167,15 @@ class SelfAssessmentHistoryAuditSpec
       val result =
         route(app, request).get
 
-      result
-        .map(_ => ())
-        .recover { case _ => () }
-        .futureValue
+      Await.ready(result, 5.seconds)
+
+      eventually {
+        server.verify(
+          postRequestedFor(
+            urlEqualTo("/write/audit")
+          )
+        )
+      }
 
       eventually {
         server.verify(
