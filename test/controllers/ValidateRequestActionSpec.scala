@@ -34,7 +34,8 @@ class ValidateRequestActionSpec extends SpecBase {
 
   def testMethod(utr: String): Action[AnyContent] = {
     (cc.actionBuilder andThen validateAction(utr)).async { request =>
-      Future.successful(Ok(
+      Future.successful(
+        Ok(
           Json.obj(
             "utr" -> request.utr,
             "startDate" -> request.requestPeriod.startDate.toString,

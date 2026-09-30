@@ -67,7 +67,8 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   val bodyParser: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
   implicit val appConfig: AppConfig = mock[AppConfig]
   val fakeValidateAction: ValidateRequestAction = new ValidateRequestAction()
-  val fakeAuthenticaAction: AuthenticateRequestAction = new AuthenticateRequestAction(mockService, authConnector) {
+  val fakeAuthenticaAction: AuthenticateRequestAction =
+    new AuthenticateRequestAction(mockService, authConnector) {
       override def filter[A](request: RequestWithUtr[A]): Future[Option[Result]] = {
         Future.successful(None)
       }
@@ -84,7 +85,8 @@ class SelfAssessmentHistoryControllerSpec extends SpecBase {
   "SelfAssessmentHistoryController" should {
     "return OK with success message" in {
       forAll(HipResponseGenerator.hipResponseGen) { hipResponse =>
-        when(mockService.viewAccountService(
+        when(
+          mockService.viewAccountService(
             any[String],
             any[LocalDate],
             any[LocalDate]
