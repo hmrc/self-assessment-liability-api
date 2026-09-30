@@ -90,8 +90,6 @@ class CitizenDetailsOutboundAuditSpec
       val auditBody =
         Json.parse(auditRequests.get(0).getBodyAsString)
 
-      println(s"Audit body:\n${Json.prettyPrint(auditBody)}")
-
       (auditBody \ "auditType").as[String] mustBe "OutboundCall"
 
       (auditBody \ "response" \ "detail" \ "statusCode")
@@ -145,8 +143,6 @@ class CitizenDetailsOutboundAuditSpec
 
     val auditBody =
       Json.parse(auditRequests.get(0).getBodyAsString)
-
-    println(s"404 Audit body:\n${Json.prettyPrint(auditBody)}")
 
     (auditBody \ "auditType").as[String] mustBe "OutboundCall"
 

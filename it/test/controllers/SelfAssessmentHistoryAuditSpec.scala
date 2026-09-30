@@ -111,10 +111,6 @@ class SelfAssessmentHistoryAuditSpec
             fail("No RequestReceived audit event was found")
           }
 
-      println(
-        s"RequestReceived audit:\n${Json.prettyPrint(requestReceivedAudit)}"
-      )
-
       val detail =
         requestReceivedAudit \ "detail"
 
