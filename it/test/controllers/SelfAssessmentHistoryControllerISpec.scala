@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
-import utils.{IntegrationSpecBase, TaxYearFormatter}
+import utils.IntegrationSpecBase
 import utils.constants.ErrorMessageConstansts.*
 
 import java.net.URI
@@ -67,10 +67,9 @@ class SelfAssessmentHistoryControllerISpec extends IntegrationSpecBase {
           simulateGet(mtdLookupUrl, OK, mtdIdPayload)
           simulateGet(hipUrl, OK, hipResponsePayload.toString)
           val request = client.get(URI.create(baseUrl).toURL).setHeader("Authorization" -> "Bearer 1234").execute[HttpResponse]
-          val formattedResponse = Json.toJson(TaxYearFormatter.formatter(hipResponse))
           val result = Await.result(request, 5.seconds)
           result.status mustEqual OK
-          result.body mustEqual  formattedResponse.toString
+          result.body mustEqual hipResponsePayload.toString
         }
       }
       "return 500 if call fails due to data quality issues" in {

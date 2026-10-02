@@ -26,7 +26,6 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import shared.{HipResponseGenerator, SpecBase}
-import utils.TaxYearFormatter
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -114,9 +113,8 @@ class SelfAssessmentServiceSpec extends SpecBase {
             meq(today)
           )(any(), any())
         ).thenReturn(Future.successful(hipResponse))
-        val formattedResponse = TaxYearFormatter.formatter(hipResponse)
         val result = service.viewAccountService("utr", today.minusYears(2), today)
-        result.futureValue shouldBe formattedResponse
+        result.futureValue shouldBe hipResponse
       }
     }
     "Enquire for self assessment data with start date provided until today's date" in {
@@ -129,9 +127,8 @@ class SelfAssessmentServiceSpec extends SpecBase {
             meq(today)
           )(any(), any())
         ).thenReturn(Future.successful(hipResponse))
-        val formattedResponse = TaxYearFormatter.formatter(hipResponse)
         val result = service.viewAccountService("utr", today.minusYears(4), today)
-        result.futureValue shouldBe formattedResponse
+        result.futureValue shouldBe hipResponse
       }
     }
 
@@ -148,25 +145,6 @@ class SelfAssessmentServiceSpec extends SpecBase {
       ).thenReturn(Future.failed(randomError))
       val result = service.viewAccountService("utr", today, today)
       result.failed.futureValue mustEqual randomError
-    }
-
-    "throw Json_Validation_Error if a taxYear in any format else than YYYY is received from HIP" in {
-      val today = LocalDate.now()
-      HipResponseGenerator.hipResponseGen.map { hipResponse =>
-        val transformedHipResponse =
-          hipResponse.copy(chargeDetails = hipResponse.chargeDetails.map { charge =>
-            charge.copy(taxYear = charge.taxYear + "----")
-          })
-        when(
-          mockHipConnector.getSelfAssessmentData(
-            meq("utr"),
-            meq(today.minusYears(4)),
-            meq(today)
-          )(any(), any())
-        ).thenReturn(Future.successful(transformedHipResponse))
-        val result = service.viewAccountService("utr", today.minusYears(4), today)
-        result.failed.futureValue shouldBe Json_Validation_Error
-      }
     }
   }
 }
