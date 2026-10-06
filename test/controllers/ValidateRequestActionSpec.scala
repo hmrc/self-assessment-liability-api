@@ -17,7 +17,6 @@
 package controllers
 
 import controllers.actions.ValidateRequestAction
-import models.ServiceErrors.{Invalid_Start_Date_Error, Invalid_Utr_Error}
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -80,32 +79,48 @@ class ValidateRequestActionSpec extends SpecBase {
       endDate mustBe expectedEndDate
     }
 
-    "return Invalid_Utr_Error for an invalid utr" in {
+    "return BadRequest for an invalid utr" in {
       val invalidUtr = "invalid"
       val result = testMethod(invalidUtr)(FakeRequest())
-      result.failed.futureValue mustEqual Invalid_Utr_Error
+
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj(
+        "message" -> "Invalid request format or parameters."
+      )
     }
 
-    "return Invalid_Start_Date_Error for a date with incorrect type" in {
+    "return BadRequest for a date with incorrect type" in {
       val validUtr = "1234567890"
       val badDate = "invalid-date"
       val result = testMethod(validUtr)(FakeRequest("GET", s"/test?fromDate=$badDate"))
-      result.failed.futureValue mustEqual Invalid_Start_Date_Error
+
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj(
+        "message" -> "Invalid request format or parameters."
+      )
     }
 
-    "return Invalid_Start_Date_Error for a date in the future" in {
+    "return BadRequest for a date in the future" in {
       val validUtr = "1234567890"
       val badDate = LocalDate.now().plusDays(1)
       val result = testMethod(validUtr)(FakeRequest("GET", s"/test?fromDate=$badDate"))
-      result.failed.futureValue mustEqual Invalid_Start_Date_Error
+
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj(
+        "message" -> "Invalid request format or parameters."
+      )
     }
 
-    "return Invalid_Start_Date_Error for a date more than 7 tax years ago" in {
+    "return BadRequest for a date more than 7 tax years ago" in {
       val validUtr = "1234567890"
       val currentDate: LocalDate = LocalDate.now()
       val badDate = LocalDate.of(currentDate.getYear - 7, Month.APRIL, 6).minusDays(1)
       val result = testMethod(validUtr)(FakeRequest("GET", s"/test?fromDate=$badDate"))
-      result.failed.futureValue mustEqual Invalid_Start_Date_Error
+
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj(
+        "message" -> "Invalid request format or parameters."
+      )
     }
 
     "validate specific date ranges are correct" in {
