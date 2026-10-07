@@ -23,7 +23,9 @@ object TaxYearFormatter extends Logging {
 
   def formatter(hipResponse: HipResponse): HipResponse = {
     val chargesWithReformattedTaxYear = hipResponse.chargeDetails.map { charge =>
-      val newYearFormat = s"${charge.taxYear.toInt}-${charge.taxYear.toInt + 1}"
+      val endYear = charge.taxYear.toInt
+      val newYearFormat = s"${endYear - 1}-$endYear"
+
       charge.copy(taxYear = newYearFormat)
     }
     hipResponse.copy(chargeDetails = chargesWithReformattedTaxYear)
