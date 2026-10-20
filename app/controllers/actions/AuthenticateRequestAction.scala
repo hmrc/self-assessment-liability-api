@@ -29,6 +29,8 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.SelfAssessmentEnrolments.*
+import cats.data.EitherT
+import uk.gov.hmrc.auth.core.authorise.Predicate
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -73,37 +75,68 @@ class AuthenticateRequestAction @Inject() (
   private def dealWithNonAgentAffinity[A](
       request: RequestWithUtr[A]
   )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
-    authorised(legacySaEnrolment(request.utr)) {
-      Future.successful(None)
-    }.recoverWith { case _: AuthorisationException =>
-      selfAssessmentService
-        .getMtdIdFromUtr(request.utr)
-        .flatMap { mtdId =>
-          authorised(mtdSaEnrolment(mtdId)) {
-            Future.successful(None)
-          }
-        }
+
+    authoriseWithFallback(
+      request.utr,
+      legacySaEnrolment(request.utr),
+      mtdSaEnrolment
+    ).value.flatMap {
+      case Right(_)    => Future.successful(None)
+      case Left(error) => Future.failed(error)
     }
   }
 
   private def authenticateAgent[A](
       request: RequestWithUtr[A]
   )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
+
     authorised(principleAgentEnrolments) {
-      authorised(delegatedLegacySaEnrolment(request.utr)) {
-        Future.successful(None)
-      }.recoverWith { case _: AuthorisationException =>
-        selfAssessmentService
-          .getMtdIdFromUtr(request.utr)
-          .flatMap { mtdId =>
-            authorised(delegatedMtdEnrolment(mtdId)) {
-              Future.successful(None)
-            }.recoverWith { case _: AuthorisationException =>
-              logger.info("Agent authorisation failed as agent client relationship not established")
-              throw Unauthorised_Error
-            }
-          }
+      authoriseWithFallback(
+        request.utr,
+        delegatedLegacySaEnrolment(request.utr),
+        delegatedMtdEnrolment
+      ).value.flatMap {
+        case Right(_) =>
+          Future.successful(None)
+
+        case Left(_) =>
+          logger.info(
+            "Agent authorisation failed as agent client relationship not established"
+          )
+          Future.failed(Unauthorised_Error)
       }
     }
+  }
+
+  private def authoriseEnrolment(
+      enrolment: Predicate
+  )(implicit hc: HeaderCarrier): EitherT[Future, AuthorisationException, Unit] = {
+    EitherT {
+      authorised(enrolment) {
+        Future.successful[Either[AuthorisationException, Unit]](Right(()))
+      }.recover { case error: AuthorisationException =>
+        Left(error)
+      }
+    }
+  }
+
+  private def authoriseWithFallback(
+      utr: String,
+      legacyEnrolment: Predicate,
+      mtdEnrolment: String => Predicate
+  )(implicit hc: HeaderCarrier): EitherT[Future, AuthorisationException, Unit] = {
+
+    val legacyAuthorisation =
+      authoriseEnrolment(legacyEnrolment)
+
+    def mtdAuthorisation =
+      for {
+        mtdId <- EitherT.right[AuthorisationException](
+          selfAssessmentService.getMtdIdFromUtr(utr)
+        )
+        _ <- authoriseEnrolment(mtdEnrolment(mtdId))
+      } yield ()
+
+    legacyAuthorisation.orElse(mtdAuthorisation)
   }
 }
