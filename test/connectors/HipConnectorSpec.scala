@@ -105,5 +105,54 @@ class HipConnectorSpec extends SpecBase with HttpWireMock {
       val result = connector.getSelfAssessmentData(utr, date, date)
       result.failed.futureValue mustBe Downstream_Error
     }
+
+    "return HIP response containing positive and negative payment amounts" in {
+      val hipResponseJson = Json.parse(
+        """
+          |{
+          |  "balanceDetails": {
+          |    "totalOverdueBalance": 1500,
+          |    "totalPayableBalance": 0,
+          |    "totalPendingBalance": 0,
+          |    "totalBalance": 1500,
+          |    "totalCreditAvailable": 1900
+          |  },
+          |  "paymentHistoryDetails": [
+          |    {
+          |      "allocationReference": "BCD-7206-20240916",
+          |      "processedDate": "2025-01-10",
+          |      "paymentAmount": 5300,
+          |      "paymentMethod": "Bank GIRO Payment",
+          |      "paymentDate": "2025-01-10"
+          |    },
+          |    {
+          |      "processedDate": "2024-09-24",
+          |      "paymentAmount": -1700,
+          |      "paymentMethod": "BANK GIRO RECEIPTS",
+          |      "paymentReference": "196000001008",
+          |      "paymentDate": "2025-01-10"
+          |    },
+          |    {
+          |      "processedDate": "2024-09-24",
+          |      "paymentAmount": -200,
+          |      "paymentMethod": "BANK GIRO RECEIPTS",
+          |      "paymentReference": "196000001009",
+          |      "paymentDate": "2025-01-10"
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+      )
+
+      simulateGet(serviceUrl, OK, hipResponseJson.toString)
+
+      val result = connector.getSelfAssessmentData(utr, date, date)
+
+      result.futureValue.paymentHistoryDetails.map(_.paymentAmount) mustBe List(
+        BigDecimal(5300),
+        BigDecimal(-1700),
+        BigDecimal(-200)
+      )
+    }
   }
 }
