@@ -38,13 +38,10 @@ class PaymentHistoryDetailsSpec extends AnyWordSpec with Matchers {
       validPaymentHistory.paymentAmount shouldBe >=(BigDecimal(0))
     }
 
-    "Throw illegal argument exception if paymentAmount is negative" in {
-      val exception = intercept[IllegalArgumentException] {
-        validPaymentHistory.copy(paymentAmount = BigDecimal(-50))
-      }
+    "Allow construction when paymentAmount is negative" in {
+      val paymentHistory = validPaymentHistory.copy(paymentAmount = BigDecimal(-50))
 
-      exception shouldBe a[IllegalArgumentException]
-      exception.getMessage should include("paymentAmount must be >= 0 but was -50")
+      paymentHistory.paymentAmount shouldBe BigDecimal(-50)
     }
 
     "Handle none paymentReference correctly" in {

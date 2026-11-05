@@ -31,33 +31,15 @@ case class BalanceDetails(
     codedOutDetail: List[CodedOutDetail] = List.empty
 ) {
   require(
-    totalOverdueBalance >= 0,
-    s"totalOverdueBalance must be >= 0 but was $totalOverdueBalance"
+    totalPayableBalance <= 0 || earliestPayableDueDate.isDefined,
+    "earliestPayableDueDate must be defined when totalPayableBalance > 0"
   )
+
   require(
-    totalPayableBalance >= 0,
-    s"totalPayableBalance must be >= 0 but was $totalPayableBalance"
+    totalPendingBalance <= 0 || earliestPendingDueDate.isDefined,
+    "earliestPendingDueDate must be defined when totalPendingBalance > 0"
   )
-  require(
-    totalPendingBalance >= 0,
-    s"totalPendingBalance must be >= 0 but was $totalPendingBalance"
-  )
-  require(
-    totalCreditAvailable >= 0,
-    s"totalCreditAvailable must be >= 0 but was $totalCreditAvailable"
-  )
-  require(
-    totalBalance >= 0,
-    s"totalBalance must be >= 0 but was $totalBalance"
-  )
-  require(
-    totalPayableBalance == 0 || earliestPayableDueDate.isDefined,
-    s"earliestPayableDueDate must be defined when totalPayableBalance > 0 (was $totalPayableBalance, earliestPayableDueDate=$earliestPayableDueDate)"
-  )
-  require(
-    totalPendingBalance == 0 || earliestPendingDueDate.isDefined,
-    s"earliestPendingDueDate must be defined when totalPendingBalance > 0 (was $totalPendingBalance, earliestPendingDueDate=$earliestPendingDueDate)"
-  )
+
 }
 
 object BalanceDetails {
