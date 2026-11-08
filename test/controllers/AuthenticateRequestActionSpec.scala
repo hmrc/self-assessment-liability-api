@@ -134,6 +134,8 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         )
 
       result mustBe None
+      verify(selfAssessmentService, never())
+        .getMtdIdFromUtr(any())(any())
     }
   }
 
@@ -533,6 +535,8 @@ class AuthenticateRequestActionSpec extends SpecBase with HttpWireMock {
         new Harness(selfAssessmentService).callFilter(requestWithUtr)
 
       result.futureValue mustBe None
+      verify(selfAssessmentService, never())
+        .getMtdIdFromUtr(any())(any())
     }
 
     "return ok for an agent with delegated MTD enrolment" in {
