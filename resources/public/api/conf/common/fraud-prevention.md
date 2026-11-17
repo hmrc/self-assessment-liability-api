@@ -1,0 +1,6 @@
+
+HMRC monitors transactions to help protect your customers' confidential data from criminals and fraudsters.
+
+> **! Warning** You are required by law to submit header data for this API. This includes all associated APIs and endpoints.
+
+[Check the data you need to send](/guides/fraud-prevention). You can also use the [Test API](/api-documentation/docs/api/service/txm-fph-validator-api/1.0) during initial development and as part of your quality assurance checks.
