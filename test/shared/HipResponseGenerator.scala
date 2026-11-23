@@ -92,7 +92,6 @@ object HipResponseGenerator {
     taxYear = creationDate.getYear.toString
     dueDate <- localDateGen
     accruingInterest <- Gen.option(Gen.choose(0.0, 1000.0)).map(_.map(BigDecimal(_)))
-    accruingInterestRate <- Gen.option(Gen.choose(0.0, 15.0)).map(_.map(BigDecimal(_)))
     amendments <- Gen.containerOf[List, Amendment](amendmentsGen)
   } yield ChargeDetails(
     chargeId = chargeId,
@@ -103,7 +102,6 @@ object HipResponseGenerator {
     taxYear = taxYear,
     dueDate = dueDate,
     accruingInterest = accruingInterest,
-    accruingInterestRate = accruingInterestRate,
     amendments = amendments
   )
 

@@ -263,10 +263,6 @@ components:
                               interestEndDate:
                                 allOf:
                                   - $ref: "#/components/schemas/dateType"
-                      accruingInterestRate:
-                        description: "The current interest rate being applied."
-                        allOf:
-                          - $ref: "#/components/schemas/positiveAmountType"
                       amendments:
                         allOf:
                           - type: array
@@ -501,7 +497,6 @@ components:
             accruingInterestPeriod:
               interestStartDate: '2024-05-01'
               interestEndDate: '2024-12-01'
-            accruingInterestRate: 0.05
             amendments:
               - amendmentDate: '2024-12-08'
                 amendmentAmount: 2058.33
