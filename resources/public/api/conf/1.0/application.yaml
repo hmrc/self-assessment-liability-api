@@ -224,10 +224,6 @@ components:
                         interestEndDate:
                           allOf:
                           - $ref: "#/components/schemas/dateType"
-                  accruingInterestRate:
-                    description: The current interest rate being applied.
-                    allOf:
-                    - $ref: "#/components/schemas/positiveAmountType"
                   amendments:
                     allOf:
                     - type: array
@@ -374,9 +370,9 @@ components:
                     allOf:
                     - $ref: "#/components/schemas/dateType"
                   paymentAmount:
-                    description: The amount that was paid.
+                    description: "The payment amount, which may be positive or negative."
                     allOf:
-                    - $ref: "#/components/schemas/positiveAmountType"
+                    - $ref: "#/components/schemas/amountType_11_2"
                   paymentMethod:
                     description: "How the payment was made (e.g. bank transfer, card)."
                     allOf:
@@ -496,7 +492,6 @@ components:
           accruingInterestPeriod:
             interestStartDate: 2024-05-01
             interestEndDate: 2024-12-01
-          accruingInterestRate: 0.05
           amendments:
           - amendmentDate: 2024-12-08
             amendmentAmount: 2058.33
@@ -533,7 +528,7 @@ components:
           paymentDate: 2024-12-04
           processedDate: 2024-12-08
           allocationReference: EF2345678
-        - paymentAmount: 200
+        - paymentAmount: -200
           paymentReference: PAY888233
           paymentMethod: bank_transfer
           paymentDate: 2023-12-04

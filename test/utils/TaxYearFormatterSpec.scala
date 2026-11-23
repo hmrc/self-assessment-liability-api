@@ -43,7 +43,6 @@ class TaxYearFormatterSpec extends SpecBase {
     taxYear = "2019",
     dueDate = LocalDate.now(),
     accruingInterest = None,
-    accruingInterestRate = None,
     amendments = List.empty
   )
 

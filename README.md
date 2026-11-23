@@ -83,7 +83,6 @@ More detail can be found in the [service guide error responses](https://develope
         "interestStartDate": "2024-05-01",
         "interestEndDate": "2024-12-01"
       },
-      "accruingInterestRate": 0.05,
       "amendments": [
         {
           "amendmentDate": "2024-12-08",

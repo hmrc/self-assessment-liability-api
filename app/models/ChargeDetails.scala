@@ -29,7 +29,6 @@ case class ChargeDetails(
     taxYear: String,
     dueDate: LocalDate,
     accruingInterest: Option[BigDecimal],
-    accruingInterestRate: Option[BigDecimal],
     amendments: List[Amendment] = List.empty
 ) {
   require(
