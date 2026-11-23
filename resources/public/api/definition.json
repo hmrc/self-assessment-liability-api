@@ -4,7 +4,7 @@
     "description": "This API provides a breakdown of Self Assessment liability, showing overdue, payable and pending amounts, within HMRC tax account services.",
     "context": "individuals/self-assessment/breakdown",
     "categories": [
-      "SELF_ASSESSMENT", "INCOME_TAX_MTD"
+      "SELF_ASSESSMENT"
     ],
     "versions": [
       {
